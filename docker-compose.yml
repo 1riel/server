@@ -1,5 +1,11 @@
 name: 1riel_services
 
+
+
+# docker-compose -f 'docker-compose.yml' up -d --build 
+
+# docker-compose -f 'docker-compose.yml' up -d --build 'mongo_product'
+
 services:
 
   #################### PRODUCT SERVICE ####################
@@ -8,7 +14,7 @@ services:
   mongo_product:
     build:
       context: .
-      dockerfile: server/services/mongo/Dockerfile
+      dockerfile: services/mongo/Dockerfile
     restart: unless-stopped
     env_file:
       - .env
@@ -24,7 +30,7 @@ services:
   minio_product:
     build:
       context: .
-      dockerfile: server/services/minio/Dockerfile
+      dockerfile: services/minio/Dockerfile
     restart: unless-stopped
     env_file:
       - .env
@@ -40,7 +46,7 @@ services:
   telegram_product:
     build:
       context: .
-      dockerfile: server/services/telegram_bot/Dockerfile
+      dockerfile: services/telegram_bot/Dockerfile
     restart: unless-stopped
     env_file:
       - .env
@@ -53,7 +59,7 @@ services:
   # mongo_stage:
   #   build:
   #     context: .
-  #     dockerfile: server/services/mongo/Dockerfile
+  #     dockerfile: services/mongo/Dockerfile
   #   restart: unless-stopped
   #   environment:
   #     - MONGO_INITDB_ROOT_USERNAME=admin
@@ -70,7 +76,7 @@ services:
   # minio_stage:
   #   build:
   #     context: .
-  #     dockerfile: server/services/minio/Dockerfile
+  #     dockerfile: services/minio/Dockerfile
   #   restart: unless-stopped
   #   environment:
   #     - MINIO_ROOT_USER=admin
@@ -87,7 +93,7 @@ services:
   # telegram_stage:
   #   build:
   #     context: .
-  #     dockerfile: server/services/telegram_bot/Dockerfile
+  #     dockerfile: services/telegram_bot/Dockerfile
   #   restart: unless-stopped
   #   environment:
   #     - BOT_TOKEN=8209910932:AAEYZtLY8sk_X8kfILfyfGeT_Lyaz5Z9hM4
