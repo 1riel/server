@@ -14,9 +14,9 @@ from datetime import datetime
 from bson import ObjectId, json_util
 
 from Environment import *
-from server.utilities.Database import Mongo_DB
+from utilities.Database import Mongo_DB
 
-# from server.utilities.Debug import debug
+# from utilities.Debug import debug
 
 router = APIRouter()
 oa = OAuth2PasswordBearer(tokenUrl="token")
@@ -108,4 +108,4 @@ async def _(
 
 
 if __name__ == "__main__":
-    os.system("python server/App.py")
+    os.system("python Application.py")

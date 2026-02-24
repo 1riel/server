@@ -12,8 +12,8 @@ from PIL import Image
 from io import BytesIO
 
 from Environment import *
-from server.utilities.Storage import Storage
-from server.utilities.Token import Token
+from utilities.Storage import Storage
+from utilities.Token import Token
 
 
 router = APIRouter()
@@ -31,14 +31,14 @@ async def _(
     try:
 
         # check if object exists
-        if not s3.object_exists(BUCKET_NAME, p):
+        if not s3.object_exists(MINIO_BUCKET_PUBLIC, p):
             return Response(status_code=status.HTTP_404_NOT_FOUND)
 
         # get file extension
         ext = p.split(".")[-1].lower()
 
         # get object from s3
-        data = s3.get_object(BUCKET_NAME, p)
+        data = s3.get_object(MINIO_BUCKET_PUBLIC, p)
 
         # load image
         content = data.read()
@@ -110,7 +110,7 @@ async def _(
             bio.seek(0)  # reset pointer to start
 
             # save resized image to s3 for future requests
-            s3.put_object(BUCKET_NAME, f"resized/{target_width}x{target_height}/{p}", bio.getvalue())
+            s3.put_object(MINIO_BUCKET_PUBLIC, f"resized/{target_width}x{target_height}/{p}", bio.getvalue())
 
             return StreamingResponse(
                 bio,
@@ -127,4 +127,4 @@ async def _(
 
 
 if __name__ == "__main__":
-    os.system("python server/App.py")
+    os.system("python Application.py")

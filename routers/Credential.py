@@ -20,11 +20,11 @@ from pprint import pprint
 
 
 from Environment import *
-from server.utilities.Security import HASH
-from server.utilities.Database import Mongo_DB
-from server.utilities.Storage import Storage
-from server.utilities.Token import Token
-from server.utilities.Debug import *
+from utilities.Security import HASH
+from utilities.Database import Mongo_DB
+from utilities.Storage import Storage
+from utilities.Token import Token
+from utilities.Debug import Debug
 
 
 router = APIRouter()
@@ -48,11 +48,9 @@ async def _(
         # validate input data
         if telegram_id is None or telegram_id == "":
             return Response(status_code=status.HTTP_400_BAD_REQUEST)
-        debug(f"telegram_id : {telegram_id}")
 
         # generate otp code
         otp = f"{secrets.randbelow(1000000):06d}"
-        debug(otp)
 
         # prepare data
         body = {
@@ -60,11 +58,11 @@ async def _(
             "signup_otp": otp,
             "requested_at": datetime.now(),
         }
-        debug(f"body : {body}")
+
+        print(f"body : {body}")
 
         # check existing telegram_id in database
         existing = await db.c_credential_signup_otp.find_one({"telegram_id": telegram_id})
-        debug(f"existing : {existing}")
         if existing:
             await db.c_credential_signup_otp.update_one(
                 {"telegram_id": telegram_id},
@@ -81,10 +79,8 @@ async def _(
         # send otp code via telegram bot
         message = f"Your signup OTP:"
         requests.get(f"""{TELEGRAM_API_URL}?chat_id={telegram_id}&text={message}""", timeout=5)
-        # debug(response.text)
 
         requests.get(f"""{TELEGRAM_API_URL}?chat_id={telegram_id}&text={otp}""", timeout=5)
-        # debug(response.text)
 
         return "signup otp sent"
 
@@ -106,7 +102,6 @@ async def _(
         telegram_otp = await db.c_credential_signup_otp.find_one({"telegram_id": telegram_id})
         if not telegram_otp:
             return Response(status_code=status.HTTP_400_BAD_REQUEST)
-        debug(f"telegram_otp : {telegram_otp}")
 
         # validate otp
         if telegram_otp["signup_otp"] != signup_otp:
@@ -120,15 +115,11 @@ async def _(
             "created_at": datetime.now(),
         }
 
-        debug(user)
-
         # insert user into database
         await db.c_credential.insert_one(user)
 
         # delete otp record after successful registration
         await db.c_credential_signup_otp.delete_one({"telegram_id": telegram_id})
-
-        debug("registered")
 
         return "registered"
 
@@ -143,25 +134,22 @@ async def _(
     password: str = Form(..., json_schema_extra={"example": "11111"}),
 ):
     try:
+        # Debug.debug()
         # 1. verify username and password
         data = {
             "username": username,
             "password_hash": se.to_hash(password),
         }
         user = await db.c_credential.find_one(data)
-        debug(f"user : {user}")
 
         if not user:
             return Response(status_code=status.HTTP_401_UNAUTHORIZED)
-
-        debug(f"user token : {user.get('token')}")
 
         if user.get("token"):
             return {"token_type": "bearer", "access_token": user["token"]}
 
         # 2. generate token
         token = tk.gen(32)
-        debug(f"token : {token}")
 
         # 3. store token into database
         await db.c_credential.update_one(
@@ -174,7 +162,6 @@ async def _(
         )
 
         result = {"token_type": "bearer", "access_token": token}
-        debug(f"result : {result}")
 
         return result
 
@@ -193,13 +180,11 @@ async def _(
         user = await db.c_credential.find_one({"telegram_id": telegram_id})
         if not user:
             return Response(status_code=status.HTTP_400_BAD_REQUEST)
-        debug(f"user : {user}")
 
         user_id = user["_id"]
 
         # generate reset otp code
         reset_otp = f"{secrets.randbelow(1000000):06d}"
-        debug(f"reset_otp : {reset_otp}")
 
         # prepare data
         body = {
@@ -208,11 +193,9 @@ async def _(
             "reset_otp": reset_otp,
             "requested_at": datetime.now(),
         }
-        debug(f"body : {body}")
 
         # check existing telegram_id in database
         existing = await db.c_credential_reset_otp.find_one({"user_id": user_id})
-        debug(f"existing : {existing}")
         if existing:
             await db.c_credential_reset_otp.update_one(
                 {"user_id": user_id},
@@ -229,10 +212,8 @@ async def _(
         # send username and reset otp code via telegram bot
         message = f"Your reset OTP:"
         response = requests.get(f"""{TELEGRAM_API_URL}?chat_id={telegram_id}&text={message}""", timeout=5)
-        # debug(f"response : {response.text}")
         #
         response = requests.get(f"""{TELEGRAM_API_URL}?chat_id={telegram_id}&text={reset_otp}""", timeout=5)
-        # debug(f"response : {response.text}")
 
         return "reset otp sent"
     except Exception:
@@ -268,12 +249,10 @@ async def _(
 
         # validate telegram_id and reset_otp
         query = {"telegram_id": telegram_id, "reset_otp": reset_otp}
-        debug(f"query : {query}")
 
         exist = await db.c_credential_reset_otp.find_one(query)
         if not exist:
             return Response(status_code=status.HTTP_400_BAD_REQUEST)
-        debug(f"exist : {exist}")
 
         user_id = exist["user_id"]
 
@@ -292,7 +271,6 @@ async def _(
             },
         )
 
-        debug("username and password reseted")
     except Exception:
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -307,7 +285,6 @@ async def _(
         user = await db.c_credential.find_one({"token": token})
         if not user:
             return Response(status_code=status.HTTP_401_UNAUTHORIZED)
-        debug(f"user : {user}")
 
         # *ផ្ញើរទិន្នន័យអ្នកប្រើប្រាស់ទាំងអស់ទៅកាន់អតិថិជន
         return json.loads(json_util.dumps(user))
@@ -333,8 +310,6 @@ async def _(
         user = await db.c_credential.find_one({"token": token})
         if not user:
             return Response(status_code=status.HTTP_401_UNAUTHORIZED)
-
-        # debug(f"user : {user}")
 
         if name is not None:
             await db.c_credential.update_one({"_id": user["_id"]}, {"$set": {"name": name, "updated_at": datetime.now()}}),
@@ -372,32 +347,23 @@ async def _(
         user = await db.c_credential.find_one({"token": access_token})
         if not user:
             return Response(status_code=status.HTTP_401_UNAUTHORIZED)
-        debug(user)
 
         if profile_image is not None:
 
             # *check image size max 5 MB
             content = await profile_image.read()
-            # debug(type(content))
-            # debug(f"file size : {len(content)} bytes")
             if len(content) > MAX_IMAGE_UPLOAD_SIZE or len(content) <= 0:
                 return Response(status_code=status.HTTP_400_BAD_REQUEST)
 
             # *prepare image name and path
             now = datetime.now()
-            # debug(f"now : {now}")
             image_path = f"{now.year:04d}/{now.month:02d}/{now.day:02d}"
-            # debug(f"image_path : {image_path}")
             image_name = f"{now.strftime('%H%M%S%f')}_{tk.gen(8)}"
-            # debug(f"image_name : {image_name}")
             image_ext = profile_image.filename.split(".")[-1]
-            # debug(f"image_ext : {image_ext}")
             new_image_name = f"{image_path}/{image_name}.{image_ext}"
-            # debug(f"new_image_name : {new_image_name}")
 
             # *delete old image file if exists
             old_image_name = user.get("profile_image")
-            # debug(f"old_image_name : {old_image_name}")
             if old_image_name:
                 if s3.object_exists(BUCKET_PUBLIC, old_image_name):
                     s3.remove_object(BUCKET_PUBLIC, old_image_name)
@@ -427,26 +393,18 @@ async def _(
 
             # *check image size max 5 MB
             content = await background_image.read()
-            # debug(type(content))
-            # debug(f"file size : {len(content)} bytes")
             if len(content) > MAX_IMAGE_UPLOAD_SIZE or len(content) <= 0:
                 return Response(status_code=status.HTTP_400_BAD_REQUEST)
 
             # *prepare image name and path
             now = datetime.now()
-            # debug(f"now : {now}")
             image_path = f"{now.year:04d}/{now.month:02d}/{now.day:02d}"
-            # debug(f"image_path : {image_path}")
             image_name = f"{now.strftime('%H%M%S%f')}_{tk.gen(8)}"
-            # debug(f"image_name : {image_name}")
             image_ext = background_image.filename.split(".")[-1]
-            # debug(f"image_ext : {image_ext}")
             new_image_name = f"{image_path}/{image_name}.{image_ext}"
-            # debug(f"new_image_name : {new_image_name}")
 
             # *delete old image file if exists
             old_image_name = user.get("background_image")
-            # debug(f"old_image_name : {old_image_name}")
             if old_image_name:
                 if s3.object_exists(BUCKET_PUBLIC, old_image_name):
                     s3.remove_object(BUCKET_PUBLIC, old_image_name)
@@ -490,4 +448,4 @@ async def _(
 
 
 if __name__ == "__main__":
-    os.system("python server/App.py")
+    os.system("python Application.py")

@@ -2,9 +2,7 @@ name: 1riel_services
 
 
 
-# docker-compose -f 'docker-compose.yml' up -d --build 
 
-# docker-compose -f 'docker-compose.yml' up -d --build 'mongo_product'
 
 services:
 

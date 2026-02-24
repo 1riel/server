@@ -3,7 +3,7 @@ import sys
 
 sys.path.append(os.getcwd())
 
-# from server.utilities.Debug import debug
+# from utilities.Debug import debug
 
 
 import hmac

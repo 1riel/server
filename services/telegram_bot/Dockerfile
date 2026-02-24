@@ -6,9 +6,9 @@ RUN pip install python-telegram-bot
 RUN pip install python-dotenv
 RUN pip install ipdb
 
-COPY services/telegram_bot/App.py services/telegram_bot/App.py
+COPY services/telegram_bot/Application.py services/telegram_bot/Application.py
 COPY utilities/Debug.py utilities/Debug.py
 COPY Environment.py Environment.py
 
 
-CMD [ "python", "services/telegram_bot/App.py" ]
+CMD [ "python", "services/telegram_bot/Application.py" ]

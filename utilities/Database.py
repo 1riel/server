@@ -3,13 +3,13 @@ import sys
 
 sys.path.append(os.getcwd())
 
-# from server.utilities.Debug import debug
+# from utilities.Debug import debug
 
 
 from pymongo import AsyncMongoClient
 from typing import *
 
-from server.Environment import *
+from Environment import *
 
 
 class Mongo_DB:
@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
     async def main():
         db = Mongo_DB()
-        data = await db.c_credential.find_one({"username": "muysengly"})
+        data = await db.c_credential.find_one({"username": "aaaaa"})
         print(data)
 
     asyncio.run(main())
