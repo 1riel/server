@@ -1,4 +1,4 @@
-# Setup Ubuntu Desktop
+## 1. Setup Ubuntu Desktop
 
 ```sh
 
@@ -92,8 +92,6 @@ systemctl restart sshd
 
 # install docker
 apt install docker.io -y
-
-snap install docker
 
 
 # reload docker service

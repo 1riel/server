@@ -1,12 +1,15 @@
-# Setup for Development on windows
+## Setup Python Environment and Install Dependencies
 
 ```sh
 
-python -m venv .venv
-.venv\Scripts\activate
+
+# cd to project directory
+cd /root/gtr_server
 
 
-python -m pip install --upgrade pip
+# create and activate a virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
 
 
 pip install fastapi[all]

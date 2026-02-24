@@ -1,13 +1,12 @@
-# Setup for Development on windows
+## Setup Python Environment and Install Dependencies
 
 ```sh
 
+# create and activate a virtual environment
 python -m venv .venv
-.venv\Scripts\activate
+.venv/Scripts/activate
 
-
-python -m pip install --upgrade pip
-
+pip install --upgrade pip
 
 pip install fastapi[all]
 pip install uvicorn
