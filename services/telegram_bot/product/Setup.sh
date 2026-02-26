@@ -9,6 +9,9 @@ python -m pip install --upgrade pip
 
 # install required python packages
 pip install python-telegram-bot
+pip install python-dotenv
+pip install ipdb
+
 
 
 
@@ -25,7 +28,7 @@ After=network.target
 User=root
 Type=simple
 WorkingDirectory=${WORKING_DIR}
-ExecStart=/bin/bash -c 'source /.venv_telegram_product/bin/activate && python ${WORKING_DIR}/services/telegram_bot/product/Application.py'
+ExecStart=/.venv_telegram_product/bin/python ${WORKING_DIR}/services/telegram_bot/product/Application.py
 StandardOutput=journal
 StandardError=journal
 Restart=always

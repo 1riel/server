@@ -1,0 +1,33 @@
+# cd to project directory
+cd /root/1riel_server
+
+
+# create and activate a virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+
+# upgrade pip
+python -m pip install --upgrade pip
+
+
+pip install fastapi[all]
+pip install uvicorn
+pip install pymongo
+pip install minio
+pip install requests
+pip install ipdb
+pip install python-dotenv
+
+pip install pillow
+pip install matplotlib
+pip install python-telegram-bot
+
+#
+pip install opencv-python-headless
+pip install insightface
+pip install onnxruntime
+
+
+# development dependencies
+pip install jupyter

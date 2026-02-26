@@ -9,7 +9,7 @@ export $(cat .env | xargs)
 # MINIO_PORT
 # MINIO_CONSOLE_PORT
 # MINIO_ROOT_USER
-# MINIO_ROOT_PASSWORD
+echo $MINIO_ROOT_PASSWORD
 
 
 docker stop $CONTAINER_NAME

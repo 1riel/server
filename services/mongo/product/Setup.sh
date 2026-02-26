@@ -8,7 +8,7 @@ CONTAINER_NAME=mongodb_product
 export $(cat .env | xargs)
 # MONGO_PORT
 # MONGO_INITDB_ROOT_USERNAME
-# MONGO_INITDB_ROOT_PASSWORD
+echo $MONGO_INITDB_ROOT_PASSWORD
 
 
 docker stop $CONTAINER_NAME
