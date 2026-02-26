@@ -5,9 +5,7 @@ sys.path.append(os.getcwd())
 
 
 from telegram.ext import *
-from Environment import *
-from utilities.Debug import Debug
-
+from services.telegram_bot.stage.Environment import *
 
 class Telegram_Bot:
     def __init__(self, token: str = BOT_TOKEN):

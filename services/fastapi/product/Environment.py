@@ -3,13 +3,15 @@ import sys
 
 sys.path.append(os.getcwd())
 
-
 from utilities.Debug import Debug
 
 from dotenv import load_dotenv
 
 # ? load environment variables
 load_dotenv(".env")
+
+
+TEST = "HELLO"
 
 
 # ? General configuration for the application

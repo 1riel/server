@@ -1,1 +1,0 @@
-This folder contained the microservices that are used in the project. Each microservice is a standalone application that can be developed, deployed, and scaled independently. The microservices communicate with each other through APIs, allowing for a modular and flexible architecture.

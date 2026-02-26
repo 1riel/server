@@ -1,3 +1,6 @@
+## Clone Project and Setup Environment Variables
+
+```sh
 
 # ssh to server
 ssh root@gtr-server
@@ -5,10 +8,10 @@ ssh root@gtr-server
 
 # clone project from github to a specific directory
 cd /root
-git clone https://github.com/1riel/app.git 1riel_app
+git clone https://github.com/itcgtr/server.git gtr_server
 
 # cd to project directory
-cd /root/1riel_app
+cd /root/gtr_server
 
 
 touch .env
@@ -17,4 +20,5 @@ touch .env
 
 nano .env
 
-# NOTE: copy and paste the following content to .env file, then save and exit
+
+```
