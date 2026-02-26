@@ -1,94 +1,7 @@
-## 1. Setup Ubuntu Desktop
-
-```sh
-
-# goto super user mode
-su
-
-```
-
-### Update and Install Necessary Packages
-
-```sh
-
-# update and upgrade packages
-apt update && apt upgrade -y
-
-# install necessary packages
-apt install -y build-essential curl git vim htop net-tools
 
 
-# install python3-venv if not installed
-apt install python3-venv python3-pip -y
+# setup docker
 
-```
-
-### Install SSH Server
-
-```shell
-# install openssh-server
-apt install openssh-server -y
-
-# configure ssh to allow port 22 an d
-nano /etc/ssh/sshd_config
-
-# uncomment and set the following lines:
-# Port 22
-# ListenAddress 0.0.0.0
-# or use sed command:
-sed -i 's/#Port 22/Port 22/' /etc/ssh/sshd_config
-sed -i 's/#ListenAddress 0.0.0.0/ListenAddress 0.0.0.0/' /etc/ssh/sshd_config
-
-# in windows:  remove ssh hostkey in window os
-# del C:\Users\your_user\.ssh\known_hosts
-
-
-
-# check ssh service status
-systemctl enable ssh
-systemctl start ssh
-systemctl status ssh
-
-systemctl daemon-reexec
-systemctl daemon-reload
-systemctl restart ssh
-
-
-# ssh test connections
-ssh ains@ains-pi
-ssh gtr@gtr-server
-ssh msl@msl-server
-
-
-########## OPTIONAL ##########
-
-#
--i
-
-# add root password
-passwd
-
-# configure ssh to allow root login
-nano /etc/ssh/sshd_config
-# PermitRootLogin yes
-
-
-# list all service
-# systemctl list-units --type=service
-
-
-# restart ssh service
-systemctl daemon-reload
-systemctl restart ssh
-# or
-systemctl daemon-reload
-systemctl restart sshd
-
-```
-
-### Install Docker
-
-```shell
 
 # install docker
 apt install docker.io -y
@@ -126,11 +39,9 @@ cloudflared access tcp --hostname dev.codeshift.me --url 127.0.0.1:27018
 
 
 
-```
 
 ### Install Tailscale
 
-```shell
 # update and upgrade system
 apt-get update && apt-get upgrade -y
 
@@ -148,7 +59,15 @@ tailscale up
 
 
 
-# set tailscale service
+
+
+
+
+
+
+
+# setup tailscale.sh
+
 systemctl enable tailscaled
 systemctl start tailscaled
 systemctl daemon-reload
@@ -163,11 +82,9 @@ nmcli device wifi list
 
 # tailscale up --authkey tskey-auth-kTH63mEbZF11CNTRL-JWFpW6KEA3iB2eGUnnmK3iXhEobK5fdTS
 
-```
 
 ### Install Cloudflare Tunnel
 
-```shell
 
 # Add cloudflare gpg key
 mkdir -p --mode=0755 /usr/share/keyrings
@@ -194,4 +111,3 @@ systemctl status cloudflared
 
 
 
-```

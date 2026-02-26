@@ -1,10 +1,33 @@
+# ssh to server
+ssh root@gtr-server
+
+
+# clone project from github to a specific directory
+cd /root
+git clone https://github.com/itcgtr/server.git gtr_server
+
 # cd to project directory
-cd /root/1riel_server
+cd /root/gtr_server
 
 
-# create and activate a virtual environment
+touch .env
+
+# write environment variables to .env file
+
+nano .env
+
+# paste
+
+
+
+# * LINUX
 python3 -m venv .venv
 source .venv/bin/activate
+
+
+# * WINDOWS
+python -m venv .venv
+.venv\Scripts\activate
 
 
 # upgrade pip
