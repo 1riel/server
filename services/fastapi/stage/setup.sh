@@ -3,8 +3,8 @@ cd /root/1riel_server
 
 
 # create and activate a virtual environment
-python3 -m venv /.venv_fastapi_product
-source /.venv_fastapi_product/bin/activate
+python3 -m venv /.venv_fastapi_stage
+source /.venv_fastapi_stage/bin/activate
 
 
 
@@ -42,7 +42,7 @@ pip install jupyter
 
 
 # create systemd service
-SERVICE_NAME=1riel_fastapi_product
+SERVICE_NAME=1riel_fastapi_stage
 WORKING_DIR=$(pwd)
 
 cat <<EOF | tee /etc/systemd/system/${SERVICE_NAME}.service > /dev/null
@@ -54,7 +54,7 @@ After=network.target
 User=root
 Type=simple
 WorkingDirectory=${WORKING_DIR}
-ExecStart=/.venv_fastapi_product/bin/python -m uvicorn Application:app --host 127.0.0.1 --port 8000 --workers 4
+ExecStart=/.venv_fastapi_stage/bin/python -m uvicorn Application:app --host 127.0.0.1 --port 8000 --workers 4
 StandardOutput=journal
 StandardError=journal
 Restart=always
@@ -68,5 +68,3 @@ EOF
 systemctl daemon-reexec
 systemctl daemon-reload
 systemctl enable ${SERVICE_NAME}.service
-
-# ExecStart=/.venv_fastapi_product/bin/python -m uvicorn service.fastapi.product.Application:app --host 127.0.0.1 --port 8000 --workers 4
