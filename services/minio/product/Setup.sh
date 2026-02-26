@@ -6,9 +6,9 @@ docker pull minio/minio:latest
 # run mongo container
 CONTAINER_NAME=minio_product
 export $(cat .env | xargs)
-# MINIO_PORT
-# MINIO_CONSOLE_PORT
-# MINIO_ROOT_USER
+echo $MINIO_PORT
+echo $MINIO_CONSOLE_PORT
+echo $MINIO_ROOT_USER
 echo $MINIO_ROOT_PASSWORD
 
 

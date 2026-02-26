@@ -28,3 +28,5 @@ mkdir -p ${WORKING_DIR}/logs
 touch ${WORKING_DIR}/logs/service.log
 journalctl -u ${SERVICE_NAME} -n 10000 -o short-iso > ${WORKING_DIR}/logs/service.log
 # journalctl -u ${SERVICE_NAME} -o short-iso > ${WORKING_DIR}/logs/service.log
+
+########## OPTIONAL ##########

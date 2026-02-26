@@ -1,0 +1,1 @@
+This folder contains sample files for testing purposes. You can use these files to verify that your code is working correctly or to practice your coding skills. Each file may contain different types of data, such as text, JSON, CSV, or other formats. Feel free to explore and modify these files as needed for your projects!

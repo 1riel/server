@@ -1,5 +1,6 @@
-
 # check ports
+
+
 
 # [OPTIONAL] check what in port 8000
 lsof -i :9999
