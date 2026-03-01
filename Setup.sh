@@ -63,7 +63,7 @@ After=network.target
 User=root
 Type=simple
 WorkingDirectory=${WORKING_DIR}
-ExecStart=/.venv_server/bin/python -m uvicorn Application:app --host 127.0.0.1 --port 8000 --workers 4'
+ExecStart=/bin/bash -c 'source /.venv_server/bin/activate && uvicorn Application:app --host 127.0.0.1 --port 8000 --workers 4'
 StandardOutput=journal
 StandardError=journal
 Restart=always
@@ -78,3 +78,5 @@ EOF
 systemctl daemon-reexec
 systemctl daemon-reload
 systemctl enable ${SERVICE_NAME}.service
+
+# systemctl status ${SERVICE_NAME}.service
