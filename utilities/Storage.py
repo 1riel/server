@@ -3,8 +3,6 @@ import sys
 
 sys.path.append(os.getcwd())
 
-# from utilities.Debug import debug
-
 
 from minio import Minio
 

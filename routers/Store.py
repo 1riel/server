@@ -14,7 +14,7 @@ app = FastAPI(docs_url="/")
 @app.post("/q")
 async def _():
     try:
-        return True
+        return 1
     except Exception as e:
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -22,7 +22,7 @@ async def _():
 @app.post("/c")
 async def _():
     try:
-        return True
+        return 1
     except Exception as e:
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -30,7 +30,7 @@ async def _():
 @app.post("/r")
 async def _():
     try:
-        return True
+        return 1
     except Exception as e:
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -38,7 +38,7 @@ async def _():
 @app.post("/u")
 async def _():
     try:
-        return True
+        return 1
     except Exception as e:
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -46,7 +46,7 @@ async def _():
 @app.post("/d")
 async def _():
     try:
-        return True
+        return 1
     except Exception as e:
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

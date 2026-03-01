@@ -16,7 +16,6 @@ from bson import ObjectId, json_util
 from Environment import *
 from utilities.Database import Mongo_DB
 
-# from utilities.Debug import debug
 
 router = APIRouter()
 oa = OAuth2PasswordBearer(tokenUrl="token")
@@ -36,12 +35,39 @@ async def _():
 
 
 # todo: add limit and offset
-@router.post("/read", deprecated=0)
+@router.post("/read_total", deprecated=0)
 async def _():
     try:
-        products = await db.c_product.find().limit(10000).to_list(length=None)
+        total = await db.c_product.count_documents({})
+        return total
+    except Exception:
+        return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# todo: add limit and offset
+@router.post("/read", deprecated=0)
+async def _(
+    # page: int = Form(1, json_schema_extra={"example": 1}),
+):
+    try:
+        # read random 1000 products
+        products = await db.c_product.find({}).limit(1000).to_list(length=None)
 
         return json.loads(json_util.dumps(products))
+    except Exception:
+        return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.post("/search", deprecated=0)
+async def _(
+    query: str = Form("", json_schema_extra={"example": ""}),
+):
+    try:
+
+        search = await db.c_product.find({"name": {"$regex": query, "$options": "i"}}).limit(10000).to_list(length=None)
+
+        return json.loads(json_util.dumps(search))
+
     except Exception:
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -91,16 +117,6 @@ async def _(
 
 @router.post("/upload", deprecated=1)
 async def _():
-    try:
-        return True
-    except Exception:
-        return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-@router.post("/search", deprecated=1)
-async def _(
-    #
-):
     try:
         return True
     except Exception:

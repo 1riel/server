@@ -42,7 +42,7 @@ tk = Token()
 # *សម្រាប់ទទួល OTP code តាម Telegram bot
 @router.post("/signup_otp", deprecated=0)
 async def _(
-    telegram_id: str = Form(..., json_schema_extra={"example": "11111"}),
+    telegram_id: str = Form(..., json_schema_extra={"example": ""}),
 ):
     try:
         # validate input data
@@ -91,10 +91,10 @@ async def _(
 # *សម្រាប់ការចុះឈ្មោះអ្នកប្រើប្រាស់ថ្មី
 @router.post("/signup", deprecated=0)
 async def _(
-    username: str = Form(..., json_schema_extra={"example": "11111"}),
-    password: str = Form(..., json_schema_extra={"example": "11111"}),
-    telegram_id: str = Form(..., json_schema_extra={"example": "11111"}),
-    signup_otp: str = Form(..., json_schema_extra={"example": "11111"}),
+    username: str = Form(..., json_schema_extra={"example": ""}),
+    password: str = Form(..., json_schema_extra={"example": ""}),
+    telegram_id: str = Form(..., json_schema_extra={"example": ""}),
+    signup_otp: str = Form(..., json_schema_extra={"example": ""}),
 ):
 
     try:
@@ -130,8 +130,8 @@ async def _(
 # *សម្រាប់ការចូលប្រើប្រាស់
 @router.post("/signin", deprecated=0)
 async def _(
-    username: str = Form(..., json_schema_extra={"example": "11111"}),
-    password: str = Form(..., json_schema_extra={"example": "11111"}),
+    username: str = Form(..., json_schema_extra={"example": ""}),
+    password: str = Form(..., json_schema_extra={"example": ""}),
 ):
     try:
         # Debug.debug()
@@ -173,7 +173,7 @@ async def _(
 # *សម្រាប់ការស្ដារឡើងវិញនូវពាក្យសម្ងាត់
 @router.post("/reset_otp", deprecated=0)
 async def _(
-    telegram_id: str = Form(..., json_schema_extra={"example": "11111"}),
+    telegram_id: str = Form(..., json_schema_extra={"example": ""}),
 ):
     try:
         # validate telegram_id in database
@@ -224,7 +224,7 @@ async def _(
 # todo: respond with proper error messages
 @router.post("/reset", deprecated=0)
 async def _(
-    telegram_id: str = Form(..., json_schema_extra={"example": "6410512787"}),
+    telegram_id: str = Form(..., json_schema_extra={"example": ""}),
     reset_otp: str = Form(..., json_schema_extra={"example": ""}),
     new_username: str = Form(..., json_schema_extra={"example": ""}),
     new_password: str = Form(..., json_schema_extra={"example": ""}),
@@ -365,12 +365,12 @@ async def _(
             # *delete old image file if exists
             old_image_name = user.get("profile_image")
             if old_image_name:
-                if s3.object_exists(BUCKET_PUBLIC, old_image_name):
-                    s3.remove_object(BUCKET_PUBLIC, old_image_name)
+                if s3.object_exists(MINIO_BUCKET_PUBLIC, old_image_name):
+                    s3.remove_object(MINIO_BUCKET_PUBLIC, old_image_name)
 
             # *upload new image file
             s3.put_object(
-                bucket_name=BUCKET_PUBLIC,  # bucket name
+                bucket_name=MINIO_BUCKET_PUBLIC,  # bucket name
                 object_name=new_image_name,  # file name in bucket
                 data=BytesIO(content),  # file-like object
                 length=len(content),  # size of the data in bytes
@@ -406,12 +406,12 @@ async def _(
             # *delete old image file if exists
             old_image_name = user.get("background_image")
             if old_image_name:
-                if s3.object_exists(BUCKET_PUBLIC, old_image_name):
-                    s3.remove_object(BUCKET_PUBLIC, old_image_name)
+                if s3.object_exists(MINIO_BUCKET_PUBLIC, old_image_name):
+                    s3.remove_object(MINIO_BUCKET_PUBLIC, old_image_name)
 
             # *upload new image file
             s3.put_object(
-                bucket_name=BUCKET_PUBLIC,  # bucket name
+                bucket_name=MINIO_BUCKET_PUBLIC,  # bucket name
                 object_name=new_image_name,  # file name in bucket
                 data=BytesIO(content),  # file-like object
                 length=len(content),  # size of the data in bytes
