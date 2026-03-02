@@ -11,19 +11,17 @@ from fastapi.middleware.cors import *
 
 from Environment import *
 
-from routers import Home
-from routers import Credential
-from routers import Product
+from routers import Product, Credential, Home, Public
 
 
 app = FastAPI(title=TITLE, version="1.0.0", docs_url="/")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 
+app.include_router(Public.router, prefix="/public", tags=["Public"])
 app.include_router(Product.router, prefix="/product", tags=["Product"])
 app.include_router(Credential.router, prefix="/credential", tags=["Credential"])
 app.include_router(Home.router, prefix="/home", tags=["Home"])
-# app.include_router(Asset.router, prefix="/assets", tags=["Asset"])
 
 
 if __name__ == "__main__":
