@@ -38,7 +38,7 @@ async def _(
         ext = p.split(".")[-1].lower()
 
         # get object from s3
-        data = s3.get_object(MINIO_BUCKET_PUBLIC, p")
+        data = s3.get_object(MINIO_BUCKET_PUBLIC, p)
 
         # load image
         content = data.read()
