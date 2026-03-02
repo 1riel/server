@@ -62,9 +62,18 @@ async def _(
 @router.post("/search", deprecated=0)
 async def _(
     q: str = Form("", json_schema_extra={"example": ""}),
+    offset: int = Form(0, json_schema_extra={"example": 0}),
+    # limit: int = Form(1000, json_schema_extra={"example": 1000}),
 ):
     try:
-        search = await db.c_product.find({"name": {"$regex": q, "$options": "i"}}).limit(1000).to_list(length=None)
+
+        # offset = 900
+        limit = 100
+
+        # total = await db.c_product.count_documents({"name": {"$regex": q, "$options": "i"}})
+        # print("total", total)
+
+        search = await db.c_product.find({"name": {"$regex": q, "$options": "i"}}).skip(offset).limit(limit).to_list(length=None)
 
         # return JSONResponse(
         #     content=json.loads(json_util.dumps(search)),
