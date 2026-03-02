@@ -50,6 +50,7 @@ async def _(
     # page: int = Form(1, json_schema_extra={"example": 1}),
 ):
     try:
+
         # read random 1000 products
         products = await db.c_product.find({}).limit(1000).to_list(length=None)
 
@@ -60,13 +61,20 @@ async def _(
 
 @router.post("/search", deprecated=0)
 async def _(
-    query: str = Form("", json_schema_extra={"example": ""}),
+    q: str = Form("", json_schema_extra={"example": ""}),
 ):
     try:
+        search = await db.c_product.find({"name": {"$regex": q, "$options": "i"}}).limit(1000).to_list(length=None)
 
-        search = await db.c_product.find({"name": {"$regex": query, "$options": "i"}}).limit(10000).to_list(length=None)
-
+        # return JSONResponse(
+        #     content=json.loads(json_util.dumps(search)),
+        #     headers={
+        #         "Cache-Control": "public, max-age=2592000",
+        #     },
+        # )
         return json.loads(json_util.dumps(search))
+
+    # json.loads(json_util.dumps(search))
 
     except Exception:
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
