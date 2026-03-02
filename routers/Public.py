@@ -31,14 +31,14 @@ async def _(
     try:
 
         # check if object exists
-        if not s3.object_exists(MINIO_BUCKET_PUBLIC, f"assets/{p}"):
+        if not s3.object_exists(MINIO_BUCKET_PUBLIC, p):
             return Response(status_code=status.HTTP_404_NOT_FOUND)
 
         # get file extension
         ext = p.split(".")[-1].lower()
 
         # get object from s3
-        data = s3.get_object(MINIO_BUCKET_PUBLIC, f"assets/{p}")
+        data = s3.get_object(MINIO_BUCKET_PUBLIC, p")
 
         # load image
         content = data.read()
