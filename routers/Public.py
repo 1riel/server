@@ -110,13 +110,13 @@ async def _(
             bio.seek(0)  # reset pointer to start
 
             # save resized image to s3 for future requests
-            s3.put_object(MINIO_BUCKET_PUBLIC, f"resized/{target_width}x{target_height}/{p}", bio.getvalue())
+            # s3.put_object(MINIO_BUCKET_PUBLIC, f"resized/{target_width}x{target_height}/{p}", bio.getvalue())
 
             return StreamingResponse(
                 bio,
                 media_type="image/jpeg",
                 headers={
-                    "Cache-Control": "public, max-age=31536000",  # 1 year = 31536000 seconds
+                    "Cache-Control": "public, max-age=2592000",
                 },
             )
 

@@ -11,12 +11,10 @@ cd /root/1riel_server
 
 #
 git pull
+sudo systemctl restart 1riel_server.service
 
 # live log
-SERVICE_NAME=1riel_server
-sudo systemctl restart ${SERVICE_NAME}.service
-
-journalctl -u ${SERVICE_NAME} -f -o short-iso
+journalctl -u 1riel_server -f -o short-iso
 
 
 
