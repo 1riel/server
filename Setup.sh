@@ -5,22 +5,26 @@ ssh root@msl-t470
 # clone project from github to a specific directory
 git clone https://github.com/1riel/server.git /root/1riel_server
 
+
 # cd to project directory
 cd /root/1riel_server
 
 
+# write .env file
 touch .env
 
-# write environment variables to .env file
 
 nano .env
-
 # paste
 
 
-# create and activate a virtual environment
-python3 -m venv /.venv_server
-source /.venv_server/bin/activate
+# linux
+python3 -m venv /.venv
+source /.venv/bin/activate
+
+# windows
+python -m venv .venv
+.venv\Scripts\activate
 
 
 # upgrade pip
@@ -48,34 +52,3 @@ pip install onnxruntime
 # development dependencies
 pip install jupyter
 
-
-# create systemd service file for 1riel_server
-SERVICE_NAME=1riel_server
-WORKING_DIR=$(pwd)
-
-cat <<EOF | tee /etc/systemd/system/${SERVICE_NAME}.service > /dev/null
-[Unit]
-Description=${SERVICE_NAME}_service
-After=network.target
-
-[Service]
-User=root
-Type=simple
-WorkingDirectory=${WORKING_DIR}
-ExecStart=/bin/bash -c 'source /.venv_server/bin/activate && uvicorn Application:app --host 127.0.0.1 --port 8000 --workers 4'
-StandardOutput=journal
-StandardError=journal
-Restart=always
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-
-# start systemd
-systemctl daemon-reexec
-systemctl daemon-reload
-systemctl enable ${SERVICE_NAME}.service
-
-# systemctl status ${SERVICE_NAME}.service
