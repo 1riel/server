@@ -5,11 +5,8 @@
 !.gitignore
 
 
-
 **/z*
 **/z*/
-
-*.ipynb
 
 
 # 
