@@ -45,45 +45,29 @@ async def _():
 
 
 # todo: add limit and offset
+# @router.post("/read", deprecated=0)
+# async def _():
+#     try:
+
+#         # read random 1000 products
+#         products = await db.c_product.find({}).limit(1000).to_list(length=None)
+
+#         return json.loads(json_util.dumps(products))
+#     except Exception:
+#         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 @router.post("/read", deprecated=0)
 async def _(
-    # page: int = Form(1, json_schema_extra={"example": 1}),
-):
-    try:
-
-        # read random 1000 products
-        products = await db.c_product.find({}).limit(1000).to_list(length=None)
-
-        return json.loads(json_util.dumps(products))
-    except Exception:
-        return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-@router.post("/search", deprecated=0)
-async def _(
-    q: str = Form("", json_schema_extra={"example": ""}),
+    query: str = Form("", json_schema_extra={"example": ""}),
     offset: int = Form(0, json_schema_extra={"example": 0}),
-    # limit: int = Form(1000, json_schema_extra={"example": 1000}),
+    limit: int = Form(100, json_schema_extra={"example": 100}),
 ):
     try:
 
-        # offset = 900
-        limit = 100
+        search = await db.c_product.find({"name": {"$regex": query, "$options": "i"}}).skip(offset).limit(limit).to_list(length=None)
 
-        # total = await db.c_product.count_documents({"name": {"$regex": q, "$options": "i"}})
-        # print("total", total)
-
-        search = await db.c_product.find({"name": {"$regex": q, "$options": "i"}}).skip(offset).limit(limit).to_list(length=None)
-
-        # return JSONResponse(
-        #     content=json.loads(json_util.dumps(search)),
-        #     headers={
-        #         "Cache-Control": "public, max-age=2592000",
-        #     },
-        # )
         return json.loads(json_util.dumps(search))
-
-    # json.loads(json_util.dumps(search))
 
     except Exception:
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

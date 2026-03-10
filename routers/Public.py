@@ -24,7 +24,7 @@ tk = Token()
 
 @router.get("/{p:path}")
 async def _(
-    p: str = Path(..., json_schema_extra={"example": "apple.png"}),
+    p: str = Path(..., json_schema_extra={"example": "assets/background.png"}),
     w: int | None = Query(None),
     h: int | None = Query(None),
 ):
@@ -50,20 +50,20 @@ async def _(
         image = Image.open(BytesIO(content))
 
         # make the background white for png images
-        if ext in ["png"]:
-            image_background = Image.new("RGB", image.size, (255, 255, 255))
-            image_background.paste(image, mask=image.split()[-1])
-            image = image_background
+        # if ext in ["png"]:
+        #     image_background = Image.new("RGB", image.size, (255, 255, 255))
+        #     image_background.paste(image, mask=image.split()[-1])
+        #     image = image_background
 
         # send original image
         if w is None or h is None:
-            image.save(bio, format="JPEG")  # save image to byte array
+            image.save(bio, format="PNG")  # save image to byte array
             bio.seek(0)  # reset pointer to start
 
             # return Response(content=image_byte, media_type="image/jpeg")
             return StreamingResponse(
                 bio,
-                media_type="image/jpeg",
+                media_type="image/png",
                 headers={
                     "Cache-Control": "public, max-age=2592000",
                 },
@@ -102,12 +102,12 @@ async def _(
                 image = image.crop(box)
 
             image = image.resize((w, h), resample=Image.LANCZOS)  # resize image to target dimensions
-            image.save(bio, format="JPEG")  # save image to byte array
+            image.save(bio, format="PNG")  # save image to byte array
             bio.seek(0)  # reset pointer to start
 
             return StreamingResponse(
                 bio,
-                media_type="image/jpeg",
+                media_type="image/png",
                 headers={
                     "Cache-Control": "public, max-age=2592000",
                     # 1 day = 86400 seconds
