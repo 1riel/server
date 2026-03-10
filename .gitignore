@@ -3,7 +3,7 @@
 
 .*
 !.gitignore
-!.configuration.md
+
 
 
 **/z*

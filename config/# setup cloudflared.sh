@@ -9,10 +9,13 @@ curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | tee /usr/share/keyri
 echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | tee /etc/apt/sources.list.d/cloudflared.list
 
 # install cloudflared
-apt-get update && apt-get install cloudflared
+apt update && apt install cloudflared
+
+# upgrade cloudflared
+# apt update && apt upgrade cloudflared -y
 
 # [OPTIONAL] uninstall existing cloudflared service (if any)
-cloudflared service uninstall
+# cloudflared service uninstall
 
 
 # [SYNTAX]: install cloudflared service with access tcp
@@ -27,3 +30,6 @@ systemctl status cloudflared
 
 
 ########## OPTIONAL ##########
+
+# check cloudflared tunnel list
+cloudflared tunnel list

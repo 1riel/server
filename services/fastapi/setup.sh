@@ -74,6 +74,7 @@ EOF
 
 
 # start systemd
+SERVICE_NAME=1riel_server
 systemctl daemon-reexec
 systemctl daemon-reload
 systemctl enable ${SERVICE_NAME}.service
