@@ -11,7 +11,7 @@ from fastapi.middleware.cors import *
 
 from Environment import *
 
-from routers import Product, Credential, Home, Public
+from routers import Product, Credential, Home
 
 
 app = FastAPI(title=TITLE, version="1.0.0", docs_url="/")

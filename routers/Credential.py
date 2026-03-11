@@ -362,7 +362,7 @@ async def _(
             # image_ext = profile_image.filename.split(".")[-1]
             image_ext = "png"  # convert all images to png format
 
-            new_image_name = f"{date_time}_{token}.{image_ext}"
+            new_image_name = f"images/{date_time}_{token}.{image_ext}"
             print(f"image_name : {new_image_name}")
 
             # *delete old image file if exists
@@ -380,7 +380,7 @@ async def _(
             # *upload new image file
             s3.put_object(
                 bucket_name=MINIO_PUBLIC,  # bucket name
-                object_name=f"images/{new_image_name}",  # file name in bucket
+                object_name=new_image_name,  # file name in bucket
                 data=image_buffer,  # file-like object
                 length=image_buffer.getbuffer().nbytes,  # size of the data in bytes
             )
@@ -396,8 +396,8 @@ async def _(
                 },
             )
 
-            cvt.to_thumbnail(f"images/{new_image_name}", 100)
-            cvt.to_thumbnail(f"images/{new_image_name}", 200)
+            cvt.to_thumbnail(new_image_name, 100)
+            cvt.to_thumbnail(new_image_name, 200)
 
         if background_image is not None:
 
@@ -411,7 +411,7 @@ async def _(
             token = tk.gen(16)
             image_ext = "png"  # convert all images to png format
 
-            new_image_name = f"{date_time}_{token}.{image_ext}"
+            new_image_name = f"images/{date_time}_{token}.{image_ext}"
             print(f"image_name : {new_image_name}")
 
             # *delete old image file if exists
@@ -429,7 +429,7 @@ async def _(
             # *upload new image file
             s3.put_object(
                 bucket_name=MINIO_PUBLIC,  # bucket name
-                object_name=f"images/{new_image_name}",  # file name in bucket
+                object_name=new_image_name,  # file name in bucket
                 data=image_buffer,  # file-like object
                 length=image_buffer.getbuffer().nbytes,  # size of the data in bytes
             )
@@ -445,8 +445,8 @@ async def _(
                 },
             )
 
-            cvt.to_thumbnail(f"images/{new_image_name}", 100)
-            cvt.to_thumbnail(f"images/{new_image_name}", 200)
+            cvt.to_thumbnail(new_image_name, 100)
+            cvt.to_thumbnail(new_image_name, 200)
 
         return "updated"
 
