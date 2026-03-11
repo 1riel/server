@@ -1,4 +1,4 @@
-cd /root/1riel_server
+
 
 # pull mongo image
 docker pull minio/minio:latest
@@ -6,6 +6,7 @@ docker pull minio/minio:latest
 
 
 # run mongo container
+cd /root/1riel_server
 CONTAINER_NAME=minio
 docker stop $CONTAINER_NAME
 docker rm -f $CONTAINER_NAME
@@ -22,11 +23,32 @@ docker run -d \
 
 ##########
 
+# create volume for minio data
+docker volume create volume_minio
+
+docker volume rm vscode
+
+# list all volumes
+docker volume ls
+
+# remove unused volumes
+docker volume prune -f
+
 
 # list all containers
 docker ps -a
 
 # stop container
-CONTAINER_NAME=minio_product
+CONTAINER_NAME=minio
 docker stop $CONTAINER_NAME
 docker rm -f $CONTAINER_NAME
+
+# kill container
+CONTAINER_NAME=minio
+docker kill $CONTAINER_NAME
+
+# reset docker permissions
+sudo chown -R $USER:$USER /var/lib/docker
+
+# reset docker permissions for minio data
+sudo chown -R $USER:$USER /mnt/storage/minio/data

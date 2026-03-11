@@ -13,31 +13,33 @@ load_dotenv(".env")
 
 
 # ? General configuration for the application
-TITLE = os.getenv("TITLE", "1Riel Application Stage")
+TITLE = os.getenv("TITLE")
 
 
 # ? Database configuration for the application
 MONGO_HOST = "msl-t470"  # if not os.path.isfile("/.dockerenv") else os.getenv("MONGO_HOST", "mongo_stage")
-MONGO_PORT = os.getenv("MONGO_PORT", "27027")
-MONGO_INITDB_ROOT_USERNAME = os.getenv("MONGO_INITDB_ROOT_USERNAME", "admin")
-MONGO_INITDB_ROOT_PASSWORD = os.getenv("MONGO_INITDB_ROOT_PASSWORD", "adminadmin")
+MONGO_PORT = 27017
+MONGO_INITDB_ROOT_USERNAME = os.getenv("MONGO_INITDB_ROOT_USERNAME")
+MONGO_INITDB_ROOT_PASSWORD = os.getenv("MONGO_INITDB_ROOT_PASSWORD")
+
 MONGO_DATABASE = "database"
 MONGO_URL = f"mongodb://{MONGO_INITDB_ROOT_USERNAME}:{MONGO_INITDB_ROOT_PASSWORD}@{MONGO_HOST}:{MONGO_PORT}"
 
 
 # ? MinIO configuration for the application
 MINIO_HOST = "msl-t470"  # if not os.path.isfile("/.dockerenv") else os.getenv("MINIO_HOST", "minio_stage")
-MINIO_PORT = os.getenv("MINIO_PORT", "9900")
-MINIO_CONSOLE_PORT = os.getenv("MINIO_CONSOLE_PORT", "9901")
-MINIO_ROOT_USER = os.getenv("MINIO_ROOT_USER", "admin")
-MINIO_ROOT_PASSWORD = os.getenv("MINIO_ROOT_PASSWORD", "adminadmin")
-MINIO_BUCKET_PUBLIC = "public"
-MINIO_BUCKET_PRIVATE = "private"
+MINIO_PORT = 9000
+MINIO_CONSOLE_PORT = 9001
+MINIO_ROOT_USER = os.getenv("MINIO_ROOT_USER")
+MINIO_ROOT_PASSWORD = os.getenv(
+    "MINIO_ROOT_PASSWORD",
+)
+MINIO_PUBLIC = "public"
 MINIO_URL = f"{MINIO_HOST}:{MINIO_PORT}"
 
 
 # ? Telegram Bot configuration
-BOT_TOKEN = os.getenv("BOT_TOKEN", "")  # Telegram bot token from environment variable
+BOT_TOKEN = os.getenv("BOT_TOKEN")  # Telegram bot token from environment variable
 TELEGRAM_API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
 
 

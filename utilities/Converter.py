@@ -24,11 +24,11 @@ class Converter:
             return 0
 
         # check if object exists
-        if not self.s3.object_exists(MINIO_BUCKET_PUBLIC, input_path):
+        if not self.s3.object_exists(MINIO_PUBLIC, input_path):
             print("Object does not exist")
             return 0
 
-        file = self.s3.get_object(MINIO_BUCKET_PUBLIC, input_path)
+        file = self.s3.get_object(MINIO_PUBLIC, input_path)
         old_image = Image.open(BytesIO(file.read()))
 
         output_width = int(old_image.width * input_height / old_image.height)

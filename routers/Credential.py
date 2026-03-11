@@ -25,6 +25,7 @@ from utilities.Database import Mongo_DB
 from utilities.Storage import Storage
 from utilities.Token import Token
 from utilities.Debug import Debug
+from utilities.Converter import Converter
 
 
 router = APIRouter()
@@ -36,6 +37,7 @@ se = HASH(SECRET_KEY)
 db = Mongo_DB()
 s3 = Storage()
 tk = Token()
+cvt = Converter()
 
 
 # !ការស្នើរច្រើនៗក្នុងពេលតែមួយ
@@ -356,26 +358,32 @@ async def _(
                 return Response(status_code=status.HTTP_400_BAD_REQUEST)
 
             # *prepare image name and path
-            now = datetime.now()
-            image_path = f"{now.year:04d}/{now.month:02d}/{now.day:02d}"
-            image_name = f"{now.strftime('%H%M%S%f')}_{tk.gen(8)}"
-            image_ext = profile_image.filename.split(".")[-1]
-            new_image_name = f"{image_path}/{image_name}.{image_ext}"
+            date_time = datetime.now().strftime("%Y%m%d%H%M%S%f")
+            token = tk.gen(16)
+            # image_ext = profile_image.filename.split(".")[-1]
+            image_ext = "png"  # convert all images to png format
+
+            new_image_name = f"{date_time}_{token}.{image_ext}"
+            print(f"image_name : {new_image_name}")
 
             # *delete old image file if exists
             old_image_name = user.get("profile_image")
             if old_image_name:
-                if s3.object_exists(MINIO_BUCKET_PUBLIC, old_image_name):
-                    s3.remove_object(MINIO_BUCKET_PUBLIC, old_image_name)
+                if s3.object_exists(MINIO_PUBLIC, old_image_name):
+                    s3.remove_object(MINIO_PUBLIC, old_image_name)
+
+            # convert image to png format
+            image = Image.open(BytesIO(content))
+            image_buffer = BytesIO()
+            image.save(image_buffer, format="PNG")
+            image_buffer.seek(0)
 
             # *upload new image file
             s3.put_object(
-                bucket_name=MINIO_BUCKET_PUBLIC,  # bucket name
-                object_name=new_image_name,  # file name in bucket
-                data=BytesIO(content),  # file-like object
-                length=len(content),  # size of the data in bytes
-                part_size=10 * 1024 * 1024,  # 10 MB chunks
-                content_type=profile_image.content_type,  # MIME type of the file
+                bucket_name=MINIO_PUBLIC,  # bucket name
+                object_name=f"images/{new_image_name}",  # file name in bucket
+                data=image_buffer,  # file-like object
+                length=image_buffer.getbuffer().nbytes,  # size of the data in bytes
             )
 
             # *add image name to database
@@ -389,6 +397,9 @@ async def _(
                 },
             )
 
+            cvt.to_thumbnail(f"images/{new_image_name}", 100)
+            cvt.to_thumbnail(f"images/{new_image_name}", 200)
+
         if background_image is not None:
 
             # *check image size max 5 MB
@@ -397,26 +408,31 @@ async def _(
                 return Response(status_code=status.HTTP_400_BAD_REQUEST)
 
             # *prepare image name and path
-            now = datetime.now()
-            image_path = f"{now.year:04d}/{now.month:02d}/{now.day:02d}"
-            image_name = f"{now.strftime('%H%M%S%f')}_{tk.gen(8)}"
-            image_ext = background_image.filename.split(".")[-1]
-            new_image_name = f"{image_path}/{image_name}.{image_ext}"
+            date_time = datetime.now().strftime("%Y%m%d%H%M%S%f")
+            token = tk.gen(16)
+            image_ext = "png"  # convert all images to png format
+
+            new_image_name = f"{date_time}_{token}.{image_ext}"
+            print(f"image_name : {new_image_name}")
 
             # *delete old image file if exists
             old_image_name = user.get("background_image")
             if old_image_name:
-                if s3.object_exists(MINIO_BUCKET_PUBLIC, old_image_name):
-                    s3.remove_object(MINIO_BUCKET_PUBLIC, old_image_name)
+                if s3.object_exists(MINIO_PUBLIC, old_image_name):
+                    s3.remove_object(MINIO_PUBLIC, old_image_name)
+
+            # convert image to png format
+            image = Image.open(BytesIO(content))
+            image_buffer = BytesIO()
+            image.save(image_buffer, format="PNG")
+            image_buffer.seek(0)
 
             # *upload new image file
             s3.put_object(
-                bucket_name=MINIO_BUCKET_PUBLIC,  # bucket name
-                object_name=new_image_name,  # file name in bucket
-                data=BytesIO(content),  # file-like object
-                length=len(content),  # size of the data in bytes
-                part_size=10 * 1024 * 1024,  # 10 MB chunks
-                content_type=background_image.content_type,  # MIME type of the file
+                bucket_name=MINIO_PUBLIC,  # bucket name
+                object_name=f"images/{new_image_name}",  # file name in bucket
+                data=image_buffer,  # file-like object
+                length=image_buffer.getbuffer().nbytes,  # size of the data in bytes
             )
 
             # *add image name to database
@@ -429,6 +445,9 @@ async def _(
                     }
                 },
             )
+
+            cvt.to_thumbnail(f"images/{new_image_name}", 100)
+            cvt.to_thumbnail(f"images/{new_image_name}", 200)
 
         return "updated"
 
