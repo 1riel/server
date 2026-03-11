@@ -1,4 +1,5 @@
 
+cd /root/1riel_server
 
 # create and activate a virtual environment
 python3 -m venv /.venv_telegram
@@ -16,8 +17,6 @@ python -m pip install --upgrade pip
 pip install ipdb
 pip install python-dotenv
 pip install python-telegram-bot
-pip install python-dotenv
-pip install ipdb
 
 
 
@@ -49,13 +48,17 @@ EOF
 systemctl daemon-reexec
 systemctl daemon-reload
 systemctl enable ${SERVICE_NAME}.service
+systemctl start ${SERVICE_NAME}.service
+systemctl status ${SERVICE_NAME}.service
 
 
 # ExecStart=/.venv_fastapi_product/bin/python -m uvicorn Application:app --host 127.0.0.1 --port 8000 --workers 4
 
 
+##########
+
 # remove service
-SERVICE_NAME=1riel_telegram_stage
+SERVICE_NAME=1riel_telegram_product
 systemctl disable ${SERVICE_NAME}.service
 systemctl stop ${SERVICE_NAME}.service
 rm -rf /etc/systemd/system/${SERVICE_NAME}.service

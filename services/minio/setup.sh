@@ -1,3 +1,5 @@
+cd /root/1riel_server
+
 # pull mongo image
 docker pull minio/minio:latest
 
@@ -18,3 +20,13 @@ docker run -d \
     minio/minio:latest server /data --address ":9000" --console-address ":9001"
 
 
+##########
+
+
+# list all containers
+docker ps -a
+
+# stop container
+CONTAINER_NAME=minio_product
+docker stop $CONTAINER_NAME
+docker rm -f $CONTAINER_NAME
