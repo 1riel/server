@@ -16,8 +16,7 @@ import requests
 from io import BytesIO
 from bson import json_util
 from datetime import datetime
-from pprint import pprint
-
+from PIL import Image
 
 from Environment import *
 from utilities.Security import HASH

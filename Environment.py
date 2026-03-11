@@ -31,11 +31,9 @@ MINIO_HOST = "msl-t470"  # if not os.path.isfile("/.dockerenv") else os.getenv("
 MINIO_PORT = 9000
 MINIO_CONSOLE_PORT = 9001
 MINIO_ROOT_USER = os.getenv("MINIO_ROOT_USER")
-MINIO_ROOT_PASSWORD = os.getenv(
-    "MINIO_ROOT_PASSWORD",
-)
-MINIO_PUBLIC = "public"
+MINIO_ROOT_PASSWORD = os.getenv("MINIO_ROOT_PASSWORD")
 MINIO_URL = f"{MINIO_HOST}:{MINIO_PORT}"
+MINIO_PUBLIC = "public"
 
 
 # ? Telegram Bot configuration
