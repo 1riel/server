@@ -62,7 +62,7 @@ After=network.target
 User=root
 Type=simple
 WorkingDirectory=${WORKING_DIR}
-ExecStart=/bin/bash -c 'source /.venv_server/bin/activate && uvicorn Application:app --host 127.0.0.1 --port 8000 --workers 4'
+ExecStart=/bin/bash -c 'source /.venv_server/bin/activate && uvicorn Application:app --host 0.0.0.0 --port 8000 --workers 4'
 StandardOutput=journal
 StandardError=journal
 Restart=always
@@ -78,5 +78,18 @@ SERVICE_NAME=1riel_server
 systemctl daemon-reexec
 systemctl daemon-reload
 systemctl enable ${SERVICE_NAME}.service
+systemctl start ${SERVICE_NAME}.service
+systemctl status ${SERVICE_NAME}.service
 
 # systemctl status ${SERVICE_NAME}.service
+
+
+##########
+
+SERVICE_NAME=1riel_server
+systemctl daemon-reexec
+systemctl daemon-reload
+systemctl disable ${SERVICE_NAME}.service
+systemctl stop ${SERVICE_NAME}.service
+systemctl status ${SERVICE_NAME}.service
+
