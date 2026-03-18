@@ -28,6 +28,7 @@ class Mongo_DB:
     c_credential_signup_otp = db["c_credential_signup_otp"]
 
     c_product = db["c_product"]
+    c_store = db["c_store"]
 
     c_template = db["c_template"]
 

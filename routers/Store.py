@@ -1,51 +1,95 @@
 import os
 import sys
 
+
 sys.path.append(os.getcwd())
 
 
 from fastapi import *
+from datetime import datetime
+import json
+from bson import ObjectId, json_util
 
 from Environment import *
+from utilities.Database import Mongo_DB
 
-app = FastAPI(docs_url="/")
+router = APIRouter()
+db = Mongo_DB()
 
 
-@app.post("/q")
+@router.post("/create", deprecated=0)
 async def _():
     try:
+        blank_data = {"created_at": datetime.now()}
+
+        await db.c_store.insert_one({**blank_data})
+
         return 1
     except Exception as e:
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@app.post("/c")
-async def _():
+@router.post("/read", deprecated=0)
+async def _(
+    query: str = Form(""),
+    offset: int = Form(0),
+    limit: int = Form(100),
+):
     try:
+
+        # fmt: off
+
+        if query == "":
+            search = (
+                await db.c_store
+                .find({"is_active": {"$ne": False}}) # avoid inactive
+                .skip(offset)
+                .limit(limit)
+                .to_list(length=None)
+            )
+
+        # search = (
+        #     await db.c_store
+        #             .find({"name": {"$regex": query, "$options": "i"}})
+        #             .skip(int(offset))
+        #             .limit(int(limit))
+        #             .to_list(length=None)
+        # )
+        # fmt: on
+
+        return json.loads(json_util.dumps(search))
+
+    except Exception:
+        return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.post("/update", deprecated=0)
+async def _(
+    id: str = Form(..., json_schema_extra={"example": ""}),  # 69b8e5e5c725212733d04e56
+    name: str = Form(""),
+):
+    try:
+
+        now = datetime.now()
+
+        if name != "":
+            await db.c_store.update_one({"_id": ObjectId(id)}, {"$set": {"name": name, "updated_at": now}})
+
         return 1
+
     except Exception as e:
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@app.post("/r")
-async def _():
+@router.post("/delete", deprecated=0)
+async def _(
+    id: str = Form(..., json_schema_extra={"example": ""}),  # 69b8e5e5c725212733d04e56
+):
     try:
-        return 1
-    except Exception as e:
-        return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        now = datetime.now()
 
+        await db.c_store.update_one({"_id": ObjectId(id)}, {"$set": {"is_active": False, "updated_at": now}})
 
-@app.post("/u")
-async def _():
-    try:
-        return 1
-    except Exception as e:
-        return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-@app.post("/d")
-async def _():
-    try:
         return 1
     except Exception as e:
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

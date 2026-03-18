@@ -35,13 +35,13 @@ async def _():
 
 
 # todo: add limit and offset
-@router.post("/read_total", deprecated=0)
-async def _():
-    try:
-        total = await db.c_product.count_documents({})
-        return total
-    except Exception:
-        return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+# @router.post("/read_total", deprecated=0)
+# async def _():
+#     try:
+#         total = await db.c_product.count_documents({})
+#         return total
+#     except Exception:
+#         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # todo: add limit and offset
@@ -65,7 +65,15 @@ async def _(
 ):
     try:
 
-        search = await db.c_product.find({"name": {"$regex": query, "$options": "i"}}).skip(offset).limit(limit).to_list(length=None)
+        # fmt: off
+        search = ( 
+            await db.c_product
+                    .find({"name": {"$regex": query, "$options": "i"}})
+                    .skip(offset)
+                    .limit(limit)
+                    .to_list(length=None)
+        )
+        # fmt: on
 
         return json.loads(json_util.dumps(search))
 
