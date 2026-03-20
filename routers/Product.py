@@ -14,12 +14,11 @@ from datetime import datetime
 from bson import ObjectId, json_util
 
 from Environment import *
-from utilities.Database import Mongo_DB
+from utilities.Database import database as db
+from utilities.Bearer import bearer as oa
 
 
 router = APIRouter()
-oa = OAuth2PasswordBearer(tokenUrl="token")
-db = Mongo_DB()
 
 
 @router.post("/create", deprecated=0)
@@ -27,7 +26,7 @@ async def _():
     try:
         blank_data = {"created_at": datetime.now()}
 
-        await db.c_product.insert_one({**blank_data})
+        await db["c_product"].insert_one({**blank_data})
 
         return True
     except Exception:
@@ -38,7 +37,7 @@ async def _():
 # @router.post("/read_total", deprecated=0)
 # async def _():
 #     try:
-#         total = await db.c_product.count_documents({})
+#         total = await db["c_product"].count_documents({})
 #         return total
 #     except Exception:
 #         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -50,7 +49,7 @@ async def _():
 #     try:
 
 #         # read random 1000 products
-#         products = await db.c_product.find({}).limit(1000).to_list(length=None)
+#         products = await db["c_product"].find({}).limit(1000).to_list(length=None)
 
 #         return json.loads(json_util.dumps(products))
 #     except Exception:
@@ -61,13 +60,12 @@ async def _():
 async def _(
     query: str = Form("", json_schema_extra={"example": ""}),
     offset: int = Form(0, json_schema_extra={"example": 0}),
-    limit: int = Form(100, json_schema_extra={"example": 100}),
+    limit: int = Form(1000, json_schema_extra={"example": 1000}),
 ):
     try:
-
         # fmt: off
         search = ( 
-            await db.c_product
+            await db["c_product"]
                     .find({"name": {"$regex": query, "$options": "i"}})
                     .skip(offset)
                     .limit(limit)
@@ -86,7 +84,7 @@ async def _(
     id: str = Form(..., json_schema_extra={"example": ""}),
 ):
     try:
-        await db.c_product.delete_one({"_id": ObjectId(id)})
+        await db["c_product"].delete_one({"_id": ObjectId(id)})
 
         return True
     except Exception:
@@ -104,19 +102,19 @@ async def _(
     try:
 
         if name is not None:
-            await db.c_product.update_one({"_id": ObjectId(id)}, {"$set": {"name": name}})
+            await db["c_product"].update_one({"_id": ObjectId(id)}, {"$set": {"name": name}})
 
         if description is not None:
-            await db.c_product.update_one({"_id": ObjectId(id)}, {"$set": {"description": description}})
+            await db["c_product"].update_one({"_id": ObjectId(id)}, {"$set": {"description": description}})
 
         if price is not None:
-            await db.c_product.update_one({"_id": ObjectId(id)}, {"$set": {"price": price}})
+            await db["c_product"].update_one({"_id": ObjectId(id)}, {"$set": {"price": price}})
 
         if unit_price is not None:
-            await db.c_product.update_one({"_id": ObjectId(id)}, {"$set": {"unit_price": unit_price}})
+            await db["c_product"].update_one({"_id": ObjectId(id)}, {"$set": {"unit_price": unit_price}})
 
         if any(v is not None for v in [name, description, price, unit_price]):
-            await db.c_product.update_one({"_id": ObjectId(id)}, {"$set": {"updated_at": datetime.now()}})
+            await db["c_product"].update_one({"_id": ObjectId(id)}, {"$set": {"updated_at": datetime.now()}})
 
         return True
 

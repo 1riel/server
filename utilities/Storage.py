@@ -3,6 +3,8 @@ import sys
 
 sys.path.append(os.getcwd())
 
+from utilities.Debug import Debug
+
 
 from minio import Minio
 
@@ -24,3 +26,10 @@ class Storage(Minio):
             return True
         except Exception:
             return False
+
+
+storage = Storage()
+
+
+if __name__ == "__main__":
+    pass

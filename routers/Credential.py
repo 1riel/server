@@ -14,33 +14,23 @@ import json
 import secrets
 import requests
 from io import BytesIO
-from bson import json_util
+from bson import ObjectId, json_util
 from datetime import datetime
 from PIL import Image
 
 from Environment import *
-from utilities.Security import HASH
-from utilities.Database import Mongo_DB
-from utilities.Storage import Storage
-from utilities.Token import Token
+from utilities.Security import hash as se
+from utilities.Database import database as db
+from utilities.Storage import storage as s3
+from utilities.Token import token as tk
+from utilities.Converter import converter as cvt
+from utilities.Bearer import bearer as oa
 from utilities.Debug import Debug
-from utilities.Converter import Converter
 
 
 router = APIRouter()
 
-image_path = "assets/credential"
 
-oa = OAuth2PasswordBearer(tokenUrl="credential/signin")
-se = HASH(SECRET_KEY)
-db = Mongo_DB()
-s3 = Storage()
-tk = Token()
-cvt = Converter()
-
-
-# !ការស្នើរច្រើនៗក្នុងពេលតែមួយ
-# *សម្រាប់ទទួល OTP code តាម Telegram bot
 @router.post("/signup_otp", deprecated=0)
 async def _(
     telegram_id: str = Form(..., json_schema_extra={"example": ""}),
@@ -57,39 +47,32 @@ async def _(
         body = {
             "telegram_id": telegram_id,
             "signup_otp": otp,
-            "requested_at": datetime.now(),
+            "created_at": datetime.now(),
         }
 
         print(f"body : {body}")
 
         # check existing telegram_id in database
-        existing = await db.c_credential_signup_otp.find_one({"telegram_id": telegram_id})
+        existing = await db["c_credential_signup_otp"].find_one({"telegram_id": telegram_id})
         if existing:
-            await db.c_credential_signup_otp.update_one(
+            await db["c_credential_signup_otp"].update_one(
                 {"telegram_id": telegram_id},
-                {
-                    "$set": {
-                        "signup_otp": otp,
-                        "requested_at": datetime.now(),
-                    }
-                },
+                {"$set": {"signup_otp": otp, "created_at": datetime.now()}},
             )
         else:
-            await db.c_credential_signup_otp.insert_one(body)
+            await db["c_credential_signup_otp"].insert_one(body)
 
         # send otp code via telegram bot
         message = f"Your signup OTP:"
         requests.get(f"""{TELEGRAM_API_URL}?chat_id={telegram_id}&text={message}""", timeout=5)
-
         requests.get(f"""{TELEGRAM_API_URL}?chat_id={telegram_id}&text={otp}""", timeout=5)
 
-        return "signup otp sent"
+        return 1
 
     except Exception:
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# *សម្រាប់ការចុះឈ្មោះអ្នកប្រើប្រាស់ថ្មី
 @router.post("/signup", deprecated=0)
 async def _(
     username: str = Form(..., json_schema_extra={"example": ""}),
@@ -100,7 +83,7 @@ async def _(
 
     try:
         # validate otp
-        telegram_otp = await db.c_credential_signup_otp.find_one({"telegram_id": telegram_id})
+        telegram_otp = await db["c_credential_signup_otp"].find_one({"telegram_id": telegram_id})
         if not telegram_otp:
             return Response(status_code=status.HTTP_400_BAD_REQUEST)
 
@@ -117,18 +100,17 @@ async def _(
         }
 
         # insert user into database
-        await db.c_credential.insert_one(user)
+        await db["c_credential"].insert_one(user)
 
         # delete otp record after successful registration
-        await db.c_credential_signup_otp.delete_one({"telegram_id": telegram_id})
+        await db["c_credential_signup_otp"].delete_one({"telegram_id": telegram_id})
 
-        return "registered"
+        return 1
 
     except Exception:
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# *សម្រាប់ការចូលប្រើប្រាស់
 @router.post("/signin", deprecated=0)
 async def _(
     username: str = Form(..., json_schema_extra={"example": ""}),
@@ -141,28 +123,24 @@ async def _(
             "username": username,
             "password_hash": se.to_hash(password),
         }
-        user = await db.c_credential.find_one(data)
+        user = await db["c_credential"].find_one(data)
 
         if not user:
             return Response(status_code=status.HTTP_401_UNAUTHORIZED)
 
-        if user.get("token"):
-            return {"token_type": "bearer", "access_token": user["token"]}
+        if user.get("access_token"):
+            return {"token_type": "bearer", "access_token": user["access_token"]}
 
         # 2. generate token
-        token = tk.gen(32)
+        access_token = tk.gen(32)
 
         # 3. store token into database
-        await db.c_credential.update_one(
+        await db["c_credential"].update_one(
             {"_id": user["_id"]},
-            {
-                "$set": {
-                    "token": token,
-                }
-            },
+            {"$set": {"access_token": access_token}},
         )
 
-        result = {"token_type": "bearer", "access_token": token}
+        result = {"token_type": "bearer", "access_token": access_token}
 
         return result
 
@@ -170,59 +148,48 @@ async def _(
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# !ការស្នើរច្រើនៗក្នុងពេលតែមួយ
-# *សម្រាប់ការស្ដារឡើងវិញនូវពាក្យសម្ងាត់
 @router.post("/reset_otp", deprecated=0)
 async def _(
     telegram_id: str = Form(..., json_schema_extra={"example": ""}),
 ):
     try:
         # validate telegram_id in database
-        user = await db.c_credential.find_one({"telegram_id": telegram_id})
+        user = await db["c_credential"].find_one({"telegram_id": telegram_id})
         if not user:
             return Response(status_code=status.HTTP_400_BAD_REQUEST)
 
-        user_id = user["_id"]
-
         # generate reset otp code
         reset_otp = f"{secrets.randbelow(1000000):06d}"
+        print(reset_otp)
 
         # prepare data
         body = {
-            "user_id": user_id,
+            "user_id": user["_id"],
             "telegram_id": telegram_id,
             "reset_otp": reset_otp,
-            "requested_at": datetime.now(),
+            "created_at": datetime.now(),
         }
 
         # check existing telegram_id in database
-        existing = await db.c_credential_reset_otp.find_one({"user_id": user_id})
+        existing = await db["c_credential_reset_otp"].find_one({"user_id": user["_id"]})
         if existing:
-            await db.c_credential_reset_otp.update_one(
-                {"user_id": user_id},
-                {
-                    "$set": {
-                        "reset_otp": reset_otp,
-                        "requested_at": datetime.now(),
-                    }
-                },
+            await db["c_credential_reset_otp"].update_one(
+                {"user_id": user["_id"]},
+                {"$set": {"reset_otp": reset_otp, "created_at": datetime.now()}},
             )
         else:
-            await db.c_credential_reset_otp.insert_one(body)
+            await db["c_credential_reset_otp"].insert_one(body)
 
         # send username and reset otp code via telegram bot
         message = f"Your reset OTP:"
-        response = requests.get(f"""{TELEGRAM_API_URL}?chat_id={telegram_id}&text={message}""", timeout=5)
-        #
-        response = requests.get(f"""{TELEGRAM_API_URL}?chat_id={telegram_id}&text={reset_otp}""", timeout=5)
+        requests.get(f"""{TELEGRAM_API_URL}?chat_id={telegram_id}&text={message}""", timeout=5)
+        requests.get(f"""{TELEGRAM_API_URL}?chat_id={telegram_id}&text={reset_otp}""", timeout=5)
 
-        return "reset otp sent"
+        return 1
     except Exception:
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# *សម្រាប់ការកំណត់ពាក្យសម្ងាត់ថ្មី
-# todo: respond with proper error messages
 @router.post("/reset", deprecated=0)
 async def _(
     telegram_id: str = Form(..., json_schema_extra={"example": ""}),
@@ -232,36 +199,20 @@ async def _(
 ):
     try:
 
-        # # check telegram_id existence
-        # if telegram_id is None or telegram_id == "":
-        #     return Response(status_code=status.HTTP_400_BAD_REQUEST, content="telegram_id")
-
-        # # check reset_otp existence
-        # if reset_otp is None or reset_otp == "":
-        #     return Response(status_code=status.HTTP_400_BAD_REQUEST, content="reset_otp")
-
-        # # check new_username existence
-        # if new_username is None or new_username == "":
-        #     return Response(status_code=status.HTTP_400_BAD_REQUEST, content="new_username")
-
-        # # check new_password existence
-        # if new_password is None or new_password == "":
-        #     return Response(status_code=status.HTTP_400_BAD_REQUEST, content="new_password")
-
         # validate telegram_id and reset_otp
         query = {"telegram_id": telegram_id, "reset_otp": reset_otp}
 
-        exist = await db.c_credential_reset_otp.find_one(query)
+        exist = await db["c_credential_reset_otp"].find_one(query)
         if not exist:
             return Response(status_code=status.HTTP_400_BAD_REQUEST)
 
         user_id = exist["user_id"]
 
         # clear reset otp record after successful validation
-        await db.c_credential_reset_otp.delete_one({"user_id": user_id})
+        await db["c_credential_reset_otp"].delete_one({"user_id": user_id})
 
         # update new password_hash
-        await db.c_credential.update_one(
+        await db["c_credential"].update_one(
             {"_id": user_id},
             {
                 "$set": {
@@ -276,100 +227,80 @@ async def _(
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# *សម្រាប់ការទទួលព័ត៌មានអ្នកប្រើប្រាស់
 @router.post("/read", deprecated=0)
 async def _(
-    token: str = Depends(oa),
+    access_token: str = Depends(oa),
 ):
     try:
         # validate token and get user info
-        user = await db.c_credential.find_one({"token": token})
+        user = await db["c_credential"].find_one({"access_token": access_token})
         if not user:
             return Response(status_code=status.HTTP_401_UNAUTHORIZED)
 
-        # *ផ្ញើរទិន្នន័យអ្នកប្រើប្រាស់ទាំងអស់ទៅកាន់អតិថិជន
         return json.loads(json_util.dumps(user))
 
     except Exception:
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# *សម្រាប់ការធ្វើបច្ចុប្បន្នភាពព័ត៌មានរបស់អ្នកប្រើប្រាស់
-@router.post("/update", deprecated=0)
-async def _(
-    token: str = Depends(oa),
-    name: str | None = Form(None, json_schema_extra={"example": ""}),
-    phone_number: str | None = Form(None, json_schema_extra={"example": ""}),
-    address: str | None = Form(None, json_schema_extra={"example": ""}),
-    username: str | None = Form(None, json_schema_extra={"example": ""}),
-    password: str | None = Form(None, json_schema_extra={"example": ""}),
-    telegram_id: str | None = Form(None, json_schema_extra={"example": ""}),
-):
+def update_string(key):
+    async def _(
+        access_token: str = Depends(oa),
+        value: str | None = Form(None, json_schema_extra={"example": ""}),
+    ):
+        try:
+            exist = await db["c_credential"].find_one({"access_token": access_token})
+            if not exist:
+                return Response(status_code=status.HTTP_401_UNAUTHORIZED)
 
-    try:
+            await db["c_credential"].update_one(
+                {"_id": exist["_id"]},
+                {"$set": {key: value, "updated_at": datetime.now()}},
+            )
 
-        user = await db.c_credential.find_one({"token": token})
-        if not user:
-            return Response(status_code=status.HTTP_401_UNAUTHORIZED)
+            return 1
+        except Exception:
+            return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        if name is not None:
-            await db.c_credential.update_one({"_id": user["_id"]}, {"$set": {"name": name, "updated_at": datetime.now()}}),
-
-        if phone_number is not None:
-            await db.c_credential.update_one({"_id": user["_id"]}, {"$set": {"phone_number": phone_number, "updated_at": datetime.now()}}),
-
-        if address is not None:
-            await db.c_credential.update_one({"_id": user["_id"]}, {"$set": {"address": address, "updated_at": datetime.now()}}),
-
-        if username is not None:
-            await db.c_credential.update_one({"_id": user["_id"]}, {"$set": {"username": username, "updated_at": datetime.now()}}),
-
-        if telegram_id is not None:
-            await db.c_credential.update_one({"_id": user["_id"]}, {"$set": {"telegram_id": telegram_id, "updated_at": datetime.now()}}),
-
-        if password is not None:
-            await db.c_credential.update_one({"_id": user["_id"]}, {"$set": {"password_hash": se.to_hash(password), "updated_at": datetime.now()}}),
-
-        return "updated"
-
-    except Exception:
-        return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    return _
 
 
-# todo: minimal code
-@router.post("/upload", deprecated=0)
-async def _(
-    access_token: str = Depends(oa),
-    profile_image: UploadFile | None = File(None),
-    background_image: UploadFile | None = File(None),
-):
-    try:
+COLLUMN_STRINGS = ["name", "phone_number", "address"]
+COLLUMN_CREDENTIALS = ["username", "telegram_id", "password"]
+for key in [*COLLUMN_STRINGS, *COLLUMN_CREDENTIALS]:
+    router.post(f"/update/{key}", deprecated=0)(update_string(key))
 
-        user = await db.c_credential.find_one({"token": access_token})
-        if not user:
-            return Response(status_code=status.HTTP_401_UNAUTHORIZED)
 
-        if profile_image is not None:
+# * OK
+def upload_image(key):
+    async def _(
+        access_token: str = Depends(oa),
+        value: UploadFile = File(...),
+    ):
+        try:
+            # check if id exists
+            exist = await db["c_credential"].find_one({"access_token": access_token})
+            if not exist:
+                return Response(status_code=status.HTTP_404_NOT_FOUND)
 
-            # *check image size max 5 MB
-            content = await profile_image.read()
-            if len(content) > MAX_IMAGE_UPLOAD_SIZE or len(content) <= 0:
+            # check image size max 10 MB
+            content = await value.read()
+            if len(content) > 10 * 1024 * 1024 or len(content) <= 0:
                 return Response(status_code=status.HTTP_400_BAD_REQUEST)
 
-            # *prepare image name and path
+            # prepare image name and path
             date_time = datetime.now().strftime("%Y%m%d%H%M%S%f")
-            token = tk.gen(16)
-            # image_ext = profile_image.filename.split(".")[-1]
+            name_token = tk.gen(16)
             image_ext = "png"  # convert all images to png format
 
-            new_image_name = f"images/{date_time}_{token}.{image_ext}"
+            new_image_name = f"{date_time}_{name_token}.{image_ext}"
             print(f"image_name : {new_image_name}")
 
-            # *delete old image file if exists
-            old_image_name = user.get("profile_image")
+            # delete old image file if exists
+            old_image_name = exist.get(key)
             if old_image_name:
-                if s3.object_exists(MINIO_PUBLIC, old_image_name):
-                    s3.remove_object(MINIO_PUBLIC, old_image_name)
+                if s3.object_exists(MINIO_BUCKET_PUBLIC, old_image_name):
+                    s3.remove_object(MINIO_BUCKET_PUBLIC, old_image_name)
 
             # convert image to png format
             image = Image.open(BytesIO(content))
@@ -377,92 +308,70 @@ async def _(
             image.save(image_buffer, format="PNG")
             image_buffer.seek(0)
 
-            # *upload new image file
+            # upload new image file
             s3.put_object(
-                bucket_name=MINIO_PUBLIC,  # bucket name
-                object_name=new_image_name,  # file name in bucket
+                bucket_name=MINIO_BUCKET_PUBLIC,  # bucket name
+                object_name=f"images/{new_image_name}",  # file name in bucket
                 data=image_buffer,  # file-like object
                 length=image_buffer.getbuffer().nbytes,  # size of the data in bytes
             )
 
-            # *add image name to database
-            await db.c_credential.update_one(
-                {"_id": user["_id"]},
-                {
-                    "$set": {
-                        "profile_image": new_image_name,
-                        "updated_at": datetime.now(),
-                    }
-                },
+            # add image name to database
+            await db["c_credential"].update_one(
+                {"access_token": access_token},
+                {"$set": {key: f"images/{new_image_name}", "updated_at": datetime.now()}},
             )
 
-            cvt.to_thumbnail(new_image_name, 100)
-            cvt.to_thumbnail(new_image_name, 200)
+            cvt.to_thumbnail(f"images/{new_image_name}", 100)
+            cvt.to_thumbnail(f"images/{new_image_name}", 200)
+            return 1
+        except Exception:
+            return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        if background_image is not None:
+    return _
 
-            # *check image size max 5 MB
-            content = await background_image.read()
-            if len(content) > MAX_IMAGE_UPLOAD_SIZE or len(content) <= 0:
-                return Response(status_code=status.HTTP_400_BAD_REQUEST)
 
-            # *prepare image name and path
-            date_time = datetime.now().strftime("%Y%m%d%H%M%S%f")
-            token = tk.gen(16)
-            image_ext = "png"  # convert all images to png format
+COLLUMN_IMAGES = ["profile_image", "background_image"]
+for key in COLLUMN_IMAGES:
+    router.post(f"/upload/{key}", deprecated=0)(upload_image(key))
 
-            new_image_name = f"images/{date_time}_{token}.{image_ext}"
-            print(f"image_name : {new_image_name}")
 
-            # *delete old image file if exists
-            old_image_name = user.get("background_image")
-            if old_image_name:
-                if s3.object_exists(MINIO_PUBLIC, old_image_name):
-                    s3.remove_object(MINIO_PUBLIC, old_image_name)
+def delete(key=None):
+    async def _(
+        access_token: str = Depends(oa),
+    ):
+        try:
+            # check if id exists
+            exist = await db["c_credential"].find_one({"access_token": access_token})
+            if not exist:
+                return Response(status_code=status.HTTP_404_NOT_FOUND)
 
-            # convert image to png format
-            image = Image.open(BytesIO(content))
-            image_buffer = BytesIO()
-            image.save(image_buffer, format="PNG")
-            image_buffer.seek(0)
+            # soft delete a row
+            if key is None:
+                await db["c_credential"].update_one(
+                    {"access_token": access_token},
+                    {"$set": {"deleted_at": datetime.now()}},
+                )
+                return 1
 
-            # *upload new image file
-            s3.put_object(
-                bucket_name=MINIO_PUBLIC,  # bucket name
-                object_name=new_image_name,  # file name in bucket
-                data=image_buffer,  # file-like object
-                length=image_buffer.getbuffer().nbytes,  # size of the data in bytes
+            # delete a specific field
+            await db["c_credential"].update_one(
+                {"access_token": access_token},
+                {"$set": {key: None, "updated_at": datetime.now()}},
             )
 
-            # *add image name to database
-            await db.c_credential.update_one(
-                {"_id": user["_id"]},
-                {
-                    "$set": {
-                        "background_image": new_image_name,
-                        "updated_at": datetime.now(),
-                    }
-                },
-            )
+            return 1
 
-            cvt.to_thumbnail(new_image_name, 100)
-            cvt.to_thumbnail(new_image_name, 200)
+        except Exception:
+            return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return "updated"
-
-    except Exception:
-        return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    return _
 
 
-# todo: later
-@router.post("/delete", deprecated=1)
-async def _(
-    token: str = Depends(oa),
-):
-    try:
-        return True
-    except Exception:
-        return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+router.post("/delete", deprecated=0)(delete())
+
+for c in [*COLLUMN_STRINGS, *COLLUMN_IMAGES]:
+    router.post(f"/delete/{c}", deprecated=0)(delete(c))
 
 
 if __name__ == "__main__":

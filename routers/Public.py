@@ -12,14 +12,11 @@ from PIL import Image
 from io import BytesIO
 
 from Environment import *
-from utilities.Storage import Storage
-from utilities.Token import Token
+from utilities.Storage import storage as s3
+from utilities.Token import token as tk
 
 
 router = APIRouter()
-
-s3 = Storage()
-tk = Token()
 
 
 @router.get("/{p:path}")

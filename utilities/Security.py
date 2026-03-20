@@ -1,10 +1,12 @@
 import os
 import sys
 
+
 sys.path.append(os.getcwd())
 
 
 import hmac
+from Environment import *
 
 
 class HASH:
@@ -45,3 +47,10 @@ class HASH:
         result = self.hex_to_base62(hex_data)
 
         return result
+
+
+hash = HASH(SECRET_KEY)
+
+
+if __name__ == "__main__":
+    pass

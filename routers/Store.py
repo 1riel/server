@@ -11,10 +11,10 @@ import json
 from bson import ObjectId, json_util
 
 from Environment import *
-from utilities.Database import Mongo_DB
+from utilities.Database import database as db
 
 router = APIRouter()
-db = Mongo_DB()
+# db = Mongo_DB()
 
 
 @router.post("/create", deprecated=0)
@@ -22,7 +22,7 @@ async def _():
     try:
         blank_data = {"created_at": datetime.now()}
 
-        await db.c_store.insert_one({**blank_data})
+        await db["c_store"].insert_one({**blank_data})
 
         return 1
     except Exception as e:
@@ -41,7 +41,7 @@ async def _(
 
         if query == "":
             search = (
-                await db.c_store
+                await db["c_store"]
                 .find({"is_active": {"$ne": False}}) # avoid inactive
                 .skip(offset)
                 .limit(limit)
@@ -49,7 +49,7 @@ async def _(
             )
 
         # search = (
-        #     await db.c_store
+        #     await db["c_store"]
         #             .find({"name": {"$regex": query, "$options": "i"}})
         #             .skip(int(offset))
         #             .limit(int(limit))
@@ -73,7 +73,7 @@ async def _(
         now = datetime.now()
 
         if name != "":
-            await db.c_store.update_one({"_id": ObjectId(id)}, {"$set": {"name": name, "updated_at": now}})
+            await db["c_store"].update_one({"_id": ObjectId(id)}, {"$set": {"name": name, "updated_at": now}})
 
         return 1
 
@@ -88,7 +88,7 @@ async def _(
     try:
         now = datetime.now()
 
-        await db.c_store.update_one({"_id": ObjectId(id)}, {"$set": {"is_active": False, "updated_at": now}})
+        await db["c_store"].update_one({"_id": ObjectId(id)}, {"$set": {"is_active": False, "updated_at": now}})
 
         return 1
     except Exception as e:

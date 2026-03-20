@@ -6,14 +6,13 @@ sys.path.append(os.getcwd())
 
 from PIL import Image
 from io import BytesIO
-from utilities.Storage import Storage
+from utilities.Storage import storage as s3
 
 from Environment import *
 
 
 class Converter:
 
-    s3 = Storage()
     MAX_SIZE = 2000
 
     def to_thumbnail(self, input_path: str, input_height: int):
@@ -24,11 +23,11 @@ class Converter:
             return 0
 
         # check if object exists
-        if not self.s3.object_exists(MINIO_PUBLIC, input_path):
+        if not s3.object_exists(MINIO_BUCKET_PUBLIC, input_path):
             print("Object does not exist")
             return 0
 
-        file = self.s3.get_object(MINIO_PUBLIC, input_path)
+        file = s3.get_object(MINIO_BUCKET_PUBLIC, input_path)
         old_image = Image.open(BytesIO(file.read()))
 
         output_width = int(old_image.width * input_height / old_image.height)
@@ -36,14 +35,14 @@ class Converter:
 
         # remove old image if exists
         output_path = f"{input_height}/{input_path}"
-        if self.s3.object_exists("public", output_path):
-            self.s3.remove_object("public", output_path)
+        if s3.object_exists("public", output_path):
+            s3.remove_object("public", output_path)
 
         # save new image to s3
         image_buffer = BytesIO()
         new_image.save(image_buffer, format="PNG")
         image_buffer.seek(0)
-        self.s3.put_object(
+        s3.put_object(
             "public",
             output_path,
             image_buffer,
@@ -51,6 +50,9 @@ class Converter:
         )
 
 
-# convert = Converter()
+converter = Converter()
 
-# convert.to_thumbnail("assets/logo_itc.png", 200)
+# converter.to_thumbnail("assets/logo_itc.png", 200)
+
+if __name__ == "__main__":
+    pass
