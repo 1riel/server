@@ -41,6 +41,29 @@ async def _(
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@router.post("/read", deprecated=0)
+async def _(
+    query: str = Form("", json_schema_extra={"example": ""}),
+    offset: int = Form(0, json_schema_extra={"example": 0}),
+    limit: int = Form(1000, json_schema_extra={"example": 1000}),
+):
+    try:
+        # fmt: off
+        search = ( 
+            await db["c_product"]
+                    .find({"name": {"$regex": query, "$options": "i"}})
+                    .skip(offset)
+                    .limit(limit)
+                    .to_list(length=None)
+        )
+        # fmt: on
+
+        return json.loads(json_util.dumps(search))
+
+    except Exception:
+        return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 # create need access token
 # read don't need access token
 # update need access token
