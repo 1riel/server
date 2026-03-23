@@ -1,17 +1,21 @@
 import os
+import time
 import paramiko
 
-
+# git commit and push
 os.system("git add .")
 os.system(f'git commit -m "update"')
 os.system("git push")
 
 
-# Create SSH client
+time.sleep(10)  # delay for 10 seconds
+
+
+# create SSH client
 client = paramiko.SSHClient()
 client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-# Connect
+# connect to the server
 client.connect(
     hostname="msl-t470",
     port=22,
@@ -20,7 +24,14 @@ client.connect(
 )  # or use pkey= for key-based auth
 
 
-stdin, stdout, stderr = client.exec_command("cd /root/1riel_server && git pull && systemctl restart 1riel_server.service")
+command = [
+    "cd /root/1riel_server",
+    "git pull",
+    "systemctl restart 1riel_server.service",
+]
+
+
+stdin, stdout, stderr = client.exec_command(" && ".join(command))
 print(stdout.read().decode())
 
 client.close()
