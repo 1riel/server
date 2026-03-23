@@ -5,7 +5,6 @@ import sys
 sys.path.append(os.getcwd())
 
 from typing import *
-from typing import Literal
 from fastapi import *
 from fastapi.responses import *
 from fastapi.security import *
@@ -128,6 +127,9 @@ async def _(
         if not user:
             return Response(status_code=status.HTTP_401_UNAUTHORIZED)
 
+        if user.get("deleted_at"):
+            return Response(status_code=status.HTTP_401_UNAUTHORIZED)
+
         if user.get("access_token"):
             return {"token_type": "bearer", "access_token": user["access_token"]}
 
@@ -227,20 +229,25 @@ async def _(
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.post("/read", deprecated=0)
-async def _(
-    access_token: str = Depends(oa),
-):
-    try:
-        # validate token and get user info
-        user = await db["c_credential"].find_one({"access_token": access_token})
-        if not user:
-            return Response(status_code=status.HTTP_401_UNAUTHORIZED)
+def read_one_credential():
+    async def _(
+        access_token: str = Depends(oa),
+    ):
+        try:
+            # validate token and get user info
+            user = await db["c_credential"].find_one({"access_token": access_token})
+            if not user:
+                return Response(status_code=status.HTTP_401_UNAUTHORIZED)
 
-        return json.loads(json_util.dumps(user))
+            return json.loads(json_util.dumps(user))
 
-    except Exception:
-        return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception:
+            return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    return _
+
+
+router.post("/read", deprecated=0)(read_one_credential())
 
 
 def update_string(key):
@@ -265,9 +272,49 @@ def update_string(key):
     return _
 
 
-COLLUMN_STRINGS = ["name", "phone_number", "address"]
-COLLUMN_CREDENTIALS = ["username", "telegram_id", "password"]
-for key in [*COLLUMN_STRINGS, *COLLUMN_CREDENTIALS]:
+def update_number(key):
+    async def _(
+        access_token: str = Depends(oa),
+        value: float | None = Form(None, json_schema_extra={"example": 0}),
+    ):
+        try:
+            exist = await db["c_credential"].find_one({"access_token": access_token})
+            if not exist:
+                return Response(status_code=status.HTTP_401_UNAUTHORIZED)
+
+            await db["c_credential"].update_one(
+                {"_id": exist["_id"]},
+                {"$set": {key: value, "updated_at": datetime.now()}},
+            )
+
+            return 1
+        except Exception:
+            return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    return _
+
+
+COLLUMN_STRINGS = [
+    "name",
+    "address",
+    # "store_id",
+    # "driver_id",
+]
+for key in COLLUMN_STRINGS:
+    router.post(f"/update/{key}", deprecated=0)(update_string(key))
+
+COLLUMN_NUMBERS = [
+    "phone_number",
+]
+for key in COLLUMN_NUMBERS:
+    router.post(f"/update/{key}", deprecated=0)(update_number(key))
+
+COLLUMN_CREDENTIALS = [
+    "username",
+    "password",
+    "telegram_id",
+]
+for key in COLLUMN_CREDENTIALS:
     router.post(f"/update/{key}", deprecated=0)(update_string(key))
 
 
@@ -369,8 +416,7 @@ def delete(key=None):
 
 
 router.post("/delete", deprecated=0)(delete())
-
-for c in [*COLLUMN_STRINGS, *COLLUMN_IMAGES]:
+for c in [*COLLUMN_STRINGS, *COLLUMN_NUMBERS, *COLLUMN_IMAGES]:
     router.post(f"/delete/{c}", deprecated=0)(delete(c))
 
 

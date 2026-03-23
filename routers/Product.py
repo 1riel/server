@@ -22,8 +22,16 @@ router = APIRouter()
 
 
 @router.post("/create", deprecated=0)
-async def _():
+async def _(
+    #
+    access_token: str = Depends(oa),
+):
     try:
+
+        user = await db["c_credential"].find_one({"access_token": access_token})
+        if not user:
+            return Response(status_code=status.HTTP_401_UNAUTHORIZED)
+
         blank_data = {"created_at": datetime.now()}
 
         await db["c_product"].insert_one({**blank_data})
@@ -33,102 +41,10 @@ async def _():
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# todo: add limit and offset
-# @router.post("/read_total", deprecated=0)
-# async def _():
-#     try:
-#         total = await db["c_product"].count_documents({})
-#         return total
-#     except Exception:
-#         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-# todo: add limit and offset
-# @router.post("/read", deprecated=0)
-# async def _():
-#     try:
-
-#         # read random 1000 products
-#         products = await db["c_product"].find({}).limit(1000).to_list(length=None)
-
-#         return json.loads(json_util.dumps(products))
-#     except Exception:
-#         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-@router.post("/read", deprecated=0)
-async def _(
-    query: str = Form("", json_schema_extra={"example": ""}),
-    offset: int = Form(0, json_schema_extra={"example": 0}),
-    limit: int = Form(1000, json_schema_extra={"example": 1000}),
-):
-    try:
-        # fmt: off
-        search = ( 
-            await db["c_product"]
-                    .find({"name": {"$regex": query, "$options": "i"}})
-                    .skip(offset)
-                    .limit(limit)
-                    .to_list(length=None)
-        )
-        # fmt: on
-
-        return json.loads(json_util.dumps(search))
-
-    except Exception:
-        return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-@router.post("/delete", deprecated=0)
-async def _(
-    id: str = Form(..., json_schema_extra={"example": ""}),
-):
-    try:
-        await db["c_product"].delete_one({"_id": ObjectId(id)})
-
-        return True
-    except Exception:
-        return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-@router.post("/update", deprecated=0)
-async def _(
-    id: str = Form(..., json_schema_extra={"example": ""}),
-    name: str | None = Form(None, json_schema_extra={"example": ""}),
-    description: str | None = Form(None, json_schema_extra={"example": ""}),
-    price: float | None = Form(None, json_schema_extra={"example": ""}),
-    unit_price: str | None = Form(None, json_schema_extra={"example": ""}),
-):
-    try:
-
-        if name is not None:
-            await db["c_product"].update_one({"_id": ObjectId(id)}, {"$set": {"name": name}})
-
-        if description is not None:
-            await db["c_product"].update_one({"_id": ObjectId(id)}, {"$set": {"description": description}})
-
-        if price is not None:
-            await db["c_product"].update_one({"_id": ObjectId(id)}, {"$set": {"price": price}})
-
-        if unit_price is not None:
-            await db["c_product"].update_one({"_id": ObjectId(id)}, {"$set": {"unit_price": unit_price}})
-
-        if any(v is not None for v in [name, description, price, unit_price]):
-            await db["c_product"].update_one({"_id": ObjectId(id)}, {"$set": {"updated_at": datetime.now()}})
-
-        return True
-
-    except Exception:
-        return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-@router.post("/upload", deprecated=1)
-async def _():
-    try:
-        return True
-    except Exception:
-        return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+# create need access token
+# read don't need access token
+# update need access token
+# delete need access token
 
 if __name__ == "__main__":
     os.system("python Application.py")

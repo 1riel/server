@@ -30,6 +30,7 @@ COLLECTION = "c_crud"
 COLLUMN_STRINGS = [
     "name",
     "description",
+    "store_name",
 ]
 COLLUMN_NUMBERS = [
     "price",
@@ -77,7 +78,7 @@ def read():
         query: Optional[str] = Form(None, json_schema_extra={"example": ""}),
         offset: Optional[int] = Form(None, json_schema_extra={"example": 0}, ge=0),
         limit: Optional[int] = Form(None, json_schema_extra={"example": 1000}, ge=1, le=10000),
-        sort_by: Literal["created_at", "order", *COLLUMN_STRINGS] = Form("created_at"),  # type: ignore
+        sort_by: Literal["created_at", "order", *COLLUMN_STRINGS, *COLLUMN_NUMBERS] = Form("created_at"),  # type: ignore
         sort_order: Literal["-1", "1"] = Form("-1"),
     ):
         try:
