@@ -1,6 +1,8 @@
 import os
 import time
 import paramiko
+from tqdm import tqdm
+
 
 # git commit and push
 os.system("git add .")
@@ -8,7 +10,9 @@ os.system(f'git commit -m "update"')
 os.system("git push")
 
 
-time.sleep(10)  # delay for 10 seconds
+# delay for 10 seconds
+for _ in tqdm(range(100), desc="Waiting", unit="s"):
+    time.sleep(0.1)
 
 
 # create SSH client
