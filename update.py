@@ -2,6 +2,10 @@ import os
 import time
 import paramiko
 from tqdm import tqdm
+from dotenv import load_dotenv
+
+# load environment variables
+load_dotenv(".env")
 
 
 # git commit and push
@@ -21,21 +25,24 @@ client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
 # connect to the server
 client.connect(
-    hostname="msl-t470",
+    hostname=os.getenv("SERVER_HOST"),
     port=22,
-    username="root",
-    password="asdfghjkl;'",
-)  # or use pkey= for key-based auth
+    username=os.getenv("SERVER_USERNAME"),
+    password=os.getenv("SERVER_PASSWORD"),
+)
 
-
+# single line commands
 command = [
     "cd /root/1riel_server",
     "git pull",
     "systemctl restart 1riel_server.service",
 ]
 
-
+# execute commands
 stdin, stdout, stderr = client.exec_command(" && ".join(command))
 print(stdout.read().decode())
+
+
+print("Update successfully!")
 
 client.close()
