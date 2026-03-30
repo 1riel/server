@@ -1,6 +1,16 @@
 # ssh to server
 ssh root@msl-t470
 
+
+apt update && apt upgrade -y
+apt install python3-venv -y
+apt install python3-pip -y
+apt install git -y
+apt install nano -y
+apt install docker.io -y
+
+
+
 # clone project from github to a specific directory
 git clone https://github.com/1riel/server.git /root/1riel_server
 
