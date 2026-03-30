@@ -16,7 +16,7 @@ os.system("git push")
 
 # delay for 10 seconds
 for _ in tqdm(range(100), desc="Waiting", unit="s"):
-    time.sleep(0.1)
+    time.sleep(0.01)
 
 
 # create SSH client
@@ -35,7 +35,7 @@ client.connect(
 command = [
     "cd /root/1riel_server",
     "git pull",
-    "cmod +x services/mongodb/setup.sh",
+    "cmod 755 services/mongodb/setup.sh",
     "services/mongodb/setup.sh",
 ]
 
