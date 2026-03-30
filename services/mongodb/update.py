@@ -36,7 +36,7 @@ command = [
     "cd /root/1riel_server",
     "git pull",
     "chmod 755 services/mongodb/setup.sh",
-    "services/mongodb/setup.sh",
+    ".services/mongodb/setup.sh",
 ]
 
 # execute commands
