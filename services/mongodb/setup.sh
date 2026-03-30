@@ -13,5 +13,6 @@ docker run -d \
     --restart unless-stopped \
     --env-file .env \
     -p 27017:27017 \
+    -e MONGO_INITDB_DATABASE=database \   
     mongo:latest
 
