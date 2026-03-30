@@ -8,11 +8,12 @@ cd /root/1riel_server
 
 docker stop mongodb
 docker rm -f mongodb
+
 docker run -d \
     --name mongodb \
     --restart unless-stopped \
     --env-file .env \
     -p 27017:27017 \
-    -e MONGO_INITDB_DATABASE=database \   
+    -e MONGO_INITDB_DATABASE=database \
     mongo:latest
 
