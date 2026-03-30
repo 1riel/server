@@ -2,9 +2,6 @@
 .*/
 
 .*
-!.gitignore
-!.dockerignore
-!.env
 
 
 **/z*
