@@ -34,11 +34,11 @@ client.connect(
 # single line commands
 command = [
     "cd /root/1riel_server",
-    "echo 'Current working directory: ' && pwd",
+    # "echo 'Current working directory: ' && pwd",
     "git pull",
-    "echo 'Pulling latest code from GitHub... Done!'",
+    # "echo 'Pulling latest code from GitHub... Done!'",
     "systemctl restart 1riel_server.service",
-    "echo 'Restarting server... Done!'",
+    # "echo 'Restarting server... Done!'",
 ]
 
 # execute commands
