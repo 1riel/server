@@ -35,7 +35,7 @@ client.connect(
 command = [
     "cd /root/1riel_server",
     "git pull",
-    "cmod 755 services/mongodb/setup.sh",
+    "chmod 755 services/mongodb/setup.sh",
     "services/mongodb/setup.sh",
 ]
 
