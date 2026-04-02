@@ -1,0 +1,26 @@
+# 
+.*/
+.*
+
+!.gitignore
+!.dockerignore
+
+
+**/z*/
+**/z*
+
+# 
+__pycache__/
+
+
+#
+update.py
+vscode.bat
+vscode.code-workspace
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example

@@ -1,0 +1,66 @@
+name: 1riel
+
+services:
+
+  mongodb:
+    # database
+    image: mongo:latest
+    container_name: mongodb
+    env_file:
+      - .env
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+
+  minio:
+    # object storage
+    image: minio/minio:latest
+    container_name: minio
+    env_file:
+      - .env
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+    
+
+  # will be removed
+  telegram:
+    # telegram bot
+    build:
+      context: .
+      dockerfile: server/services/telegram/Dockerfile
+    container_name: telegram
+    env_file:
+      - .env
+    volumes:
+      - telegram_data:/root
+    restart: unless-stopped
+
+
+  server:
+    # backend server
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: server
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - server_data:/root
+    restart: unless-stopped
+
+
+volumes:
+  mongo_data:
+  minio_data:
+  telegram_data:
+  server_data:
