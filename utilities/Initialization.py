@@ -49,12 +49,12 @@ if not s3.get_bucket_policy(MINIO_BUCKET_PUBLIC):
 # TODO: add sample data to storage
 
 # read all file
-files = glob(root_dir=os.getcwd() + "/server", pathname="assets/*")
+files = glob(root_dir=os.getcwd(), pathname="assets/*")
 # print(files)
 for f in files:
     f = f.replace("\\", "/")
     if not s3.object_exists(MINIO_BUCKET_PUBLIC, f):
-        s3.fput_object(MINIO_BUCKET_PUBLIC, f, os.getcwd() + "/server/" + f)
+        s3.fput_object(MINIO_BUCKET_PUBLIC, f, os.getcwd() + "/" + f)
         cvt.storage_to_thumbnail(f, 100)
         cvt.storage_to_thumbnail(f, 200)
 
