@@ -1,5 +1,5 @@
 
-FROM mongo:lastest
+FROM mongo:latest
 
 EXPOSE 27017
 
