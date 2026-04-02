@@ -49,10 +49,10 @@ RUN pip install python-telegram-bot
 # RUN pip install paramiko
 
 
-COPY /server /root/server
+COPY . /root
 
 
 EXPOSE 8000
 
 
-CMD ["uvicorn", "server.Application:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+CMD ["uvicorn", "Application:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]

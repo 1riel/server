@@ -8,10 +8,10 @@ sys.path.append(os.getcwd())
 from glob import glob
 
 
-from server.utilities.Storage import storage as s3
-from server.utilities.Database import database as db
-from server.utilities.Converter import converter as cvt
-from server.Environment import *
+from utilities.Storage import storage as s3
+from utilities.Database import database as db
+from utilities.Converter import converter as cvt
+from Environment import *
 
 # TODO: create bucket with policy
 
