@@ -4,7 +4,9 @@ services:
 
   mongodb:
     # database
-    image: mongo:latest
+    build:
+      context: .
+      dockerfile: services/mongodb/Dockerfile
     container_name: mongodb
     env_file:
       - .env
@@ -17,7 +19,9 @@ services:
 
   minio:
     # object storage
-    image: minio/minio:latest
+    build:
+      context: .
+      dockerfile: services/minio/Dockerfile
     container_name: minio
     env_file:
       - .env
@@ -48,7 +52,7 @@ services:
     # backend server
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: services/server/Dockerfile
     container_name: server
     env_file:
       - .env
