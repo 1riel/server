@@ -1,7 +1,6 @@
 FROM ubuntu:24.04
 
-# set working directory
-WORKDIR /root
+
 
 # set timezone
 RUN ln -snf /usr/share/zoneinfo/Asia/Phnom_Penh /etc/localtime && echo "Asia/Phnom_Penh" > /etc/timezone
@@ -48,8 +47,8 @@ RUN pip install python-telegram-bot
 # RUN pip install jupyter
 # RUN pip install paramiko
 
-
-COPY . /root
+# copy project files
+COPY . .
 
 
 EXPOSE 8000
