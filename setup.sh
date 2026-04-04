@@ -30,3 +30,5 @@ pip install paramiko
 
 
 
+# docker save volume name minio_data
+# docker run -v minio_data:/data --name minio -p 9000:9000 -e "MIN

@@ -1,0 +1,80 @@
+name: 1riel
+
+services:
+
+    mongodb:
+        # database
+        build:
+            context: .
+            dockerfile: services/mongodb/Dockerfile
+        container_name: mongodb
+        env_file:
+            - .env
+        ports:
+            - "27017:27017"
+        volumes:
+            - volume_mongodb:/data
+        restart: unless-stopped
+
+    mongodb_backup:
+        image: alpine
+        profiles: ["tools"]
+        volumes:
+            - volume_mongodb:/source:ro
+            - ./backups:/target
+        command: tar -czf /target/mongodb_backup.tar.gz -C /source .
+
+    mongodb_restore:
+        image: alpine
+        profiles: ["tools"]
+        volumes:
+            - volume_mongodb:/target
+            - ./backups:/source:ro
+        command: sh -c "tar -xzf /source/mongodb_backup.tar.gz -C /target"
+
+
+    minio:
+        # object storage
+        build:
+            context: .
+            dockerfile: services/minio/Dockerfile
+        container_name: minio
+        env_file:
+            - .env
+        ports:
+            - "9000:9000"
+            - "9001:9001"
+        volumes:
+            - volume_minio:/data
+        # - volume_minio/log:/var/log/minio
+        command: server /data --console-address ":9001"
+        restart: unless-stopped
+
+
+
+    minio_backup:
+        image: alpine
+        profiles: ["tools"]
+        volumes:
+            - volume_minio:/source:ro
+            - ./backups:/target
+        command: tar -czf /target/minio_dump.tar.gz -C /source .
+
+
+    minio_restore:
+        image: alpine
+        profiles: ["tools"]
+        volumes:
+            - volume_minio:/target
+            - ./backups:/source:ro
+        command: sh -c "tar -xzf /source/minio_dump.tar.gz -C /target"
+
+        
+
+
+volumes:
+    volume_mongodb:
+    volume_minio:
+
+
+
