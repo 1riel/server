@@ -17,7 +17,7 @@ database/
 #
 update.py
 vscode.bat
-vscode.code-workspace
+server.code-workspace
 
 # wrangler files
 .wrangler

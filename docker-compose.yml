@@ -2,8 +2,23 @@ name: 1riel
 
 services:
 
+  minio:
+    build:
+      context: .
+      dockerfile: services/minio/Dockerfile
+    container_name: minio
+    env_file:
+      - .env
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - ./database/minio/data:/data
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+
+
   mongodb:
-    # database
     build:
       context: .
       dockerfile: services/mongodb/Dockerfile
@@ -18,26 +33,8 @@ services:
     restart: unless-stopped
 
 
-  minio:
-    # object storage
-    build:
-      context: .
-      dockerfile: services/minio/Dockerfile
-    container_name: minio
-    env_file:
-      - .env
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    volumes:
-      - ./database/minio/data:/data
-    command: server /data --console-address ":9001"
-    restart: unless-stopped
-    
-
-  # will be removed
+  # NOTE: will be removed
   telegram:
-    # telegram bot
     build:
       context: .
       dockerfile: services/telegram/Dockerfile
@@ -48,7 +45,6 @@ services:
 
 
   server:
-    # backend server
     build:
       context: .
       dockerfile: services/server/Dockerfile
@@ -59,15 +55,14 @@ services:
       - "8000:8000"
     restart: unless-stopped
 
-  client:
-    # frontend client
-    build:
-      context: .
-      dockerfile: services/client/Dockerfile
-    container_name: client
-    env_file:
-      - .env
-    ports:
-      - "80:80"
-    restart: unless-stopped
+  # client:
+  #   build:
+  #     context: .
+  #     dockerfile: services/client/Dockerfile
+  #   container_name: client
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "80:80"
+  #   restart: unless-stopped
 
