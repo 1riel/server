@@ -23,7 +23,7 @@ from routers.CRUD import router as crud
 # import utilities.Initialization
 
 
-app = FastAPI(title=TITLE, version="1.0.0", docs_url="/")
+app = FastAPI(title=TITLE, version=VERSION, docs_url="/")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 

@@ -12,6 +12,7 @@ load_dotenv(".env")
 
 # ? General configuration for the application
 TITLE = os.getenv("TITLE")
+VERSION = "1.0.0+2"
 
 
 # ? Database configuration for the application
