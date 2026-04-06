@@ -25,8 +25,25 @@ from utilities.Token import token as tk
 from utilities.Converter import converter as cvt
 from utilities.Bearer import bearer as oa
 
+from urllib.parse import parse_qs, urlparse
+
 
 router = APIRouter()
+
+
+@router.get("/auth/telegram")
+async def telegram_auth(request: Request):
+
+    url = str(request.url)
+    parsed = urlparse(url)
+    qs = parse_qs(parsed.query, keep_blank_values=True)
+
+    # parse_qs returns lists; flatten to single values
+    data = {k: v[0] for k, v in qs.items()}
+
+    print(data)
+
+    return request.query_params
 
 
 @router.post("/signup_otp", deprecated=0)

@@ -35,15 +35,15 @@ class Converter:
 
         # remove old image if exists
         output_path = f"{input_height}/{input_path}"
-        if s3.object_exists("public", output_path):
-            s3.remove_object("public", output_path)
+        if s3.object_exists(MINIO_BUCKET_PUBLIC, output_path):
+            s3.remove_object(MINIO_BUCKET_PUBLIC, output_path)
 
         # save new image to s3
         image_buffer = BytesIO()
         new_image.save(image_buffer, format="PNG")
         image_buffer.seek(0)
         s3.put_object(
-            "public",
+            MINIO_BUCKET_PUBLIC,
             output_path,
             image_buffer,
             image_buffer.getbuffer().nbytes,
@@ -66,15 +66,15 @@ class Converter:
 
         # remove old image if exists
         output_path = f"{input_height}/{input_path}"
-        if s3.object_exists("public", output_path):
-            s3.remove_object("public", output_path)
+        if s3.object_exists(MINIO_BUCKET_PUBLIC, output_path):
+            s3.remove_object(MINIO_BUCKET_PUBLIC, output_path)
 
         # save new image to s3
         image_buffer = BytesIO()
         new_image.save(image_buffer, format="PNG")
         image_buffer.seek(0)
         s3.put_object(
-            "public",
+            MINIO_BUCKET_PUBLIC,
             output_path,
             image_buffer,
             image_buffer.getbuffer().nbytes,
